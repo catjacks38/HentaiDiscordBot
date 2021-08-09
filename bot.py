@@ -1,4 +1,3 @@
-import discord
 import random
 import Reddit
 import pickle
@@ -43,7 +42,20 @@ async def on_ready():
 @bot.command()
 async def reddit(ctx, *, args):
     if args == "top":
-        await ctx.send(random.choice(imageScrapperReddit.GetTop()))
+        submissions = imageScrapperReddit.Get("top")
+
+        if isinstance(submissions, int):
+            print(f"Error! Function returned {submissions}")
+        else:
+            await ctx.send(random.choice(submissions))
+
+    elif args == "hot":
+        submissions = imageScrapperReddit.Get("hot")
+
+        if isinstance(submissions, int):
+            print(f"Error! Function returned {submissions}")
+        else:
+            await ctx.send(random.choice(submissions))
     else:
         await ctx.send(f"\"{args}\" is not a supported argument of the command \".reddit\".")
 

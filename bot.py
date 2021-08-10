@@ -4,7 +4,7 @@ import pickle
 import argparse
 from discord.ext import commands
 
-bot = commands.Bot(command_prefix=".")
+bot = commands.Bot(command_prefix=".", help_command=None)
 parser = argparse.ArgumentParser(description="discord bot go brrrr")
 options = []
 
@@ -42,6 +42,7 @@ async def on_ready():
     print("lol bot is ready")
 
 
+# ".reddit" command
 @bot.command()
 async def reddit(ctx, *, args):
     parsedArgs = args.split(" ")
@@ -93,6 +94,16 @@ async def reddit(ctx, *, args):
             print("smh user never even supplied a cache argument")
     else:
         await ctx.send(f"```\"{parsedArgs[0]}\" is not a supported argument of the command \".reddit\".```")
+
+
+# ".help" command
+@bot.command(aliases=["usage"])
+async def help(ctx):
+    await ctx.send("Usage:"
+                   "\nTo query an image from Reddit:"
+                   "\n```.reddit <top or hot>```"
+                   "\nTo refresh the cache (only use if you are seeing a lot of images get reused):"
+                   "\n```.reddit refresh <top or hot>```")
 
 
 # Tries to use the discord token

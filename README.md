@@ -13,6 +13,9 @@ To start the bot, type in
 - Linux: `python3 bot.py -d <discord bot token> -i <reddit web app ID> -s <reddit web app secret token>`
 
 ## Bot Usage
+`.help` or `.usage`
+- Shows help/usage screen
+
 `.reddit <top or hot>`
 - Shows a random image from the choosen section of reddit (top or hot)
 

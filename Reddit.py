@@ -2,11 +2,13 @@ import praw
 import pickle
 import time
 
+
 # A class to store the time and a list image urls for the caches, because storing it all in a list caused an error. T_T
 class Submissions:
     def __init__(self, time, submissions):
         self.time = time
         self.submissions = submissions
+
 
 # A class for scrapping the images off of r/hentai
 class ImageScrapper:

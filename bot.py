@@ -1,7 +1,9 @@
+import Utils
 import random
 import Reddit
 import pickle
 import argparse
+import discord
 from discord.ext import commands
 
 bot = commands.Bot(command_prefix=".", help_command=None)
@@ -57,7 +59,7 @@ async def reddit(ctx, *, args):
         if isinstance(submissions, int):
             print(f"Error! Function returned {submissions}")
         else:
-            await ctx.send(random.choice(submissions))
+            await ctx.send(embed=Utils.redditEmbed(random.choice(submissions), ctx.message.author))
 
     elif parsedArgs[0] == "hot":
         submissions = imageScrapperReddit.Get("hot")
@@ -67,9 +69,13 @@ async def reddit(ctx, *, args):
         if isinstance(submissions, int):
             print(f"Error! Function returned {submissions}")
         else:
-            await ctx.send(random.choice(submissions))
+            await ctx.send(embed=Utils.redditEmbed(random.choice(submissions), ctx.message.author))
     elif parsedArgs[0] == "refresh":
-        await ctx.send("```Refreshing the cache...```")
+
+        embed = discord.Embed(title="Refreshing the cache...", color=Utils.EmbedColor)
+        embed.set_author(name=f"Cache refresh requested by {ctx.message.author.name}", icon_url=ctx.message.author.avatar_url)
+
+        await ctx.send(embed=embed)
 
         # Checks to make sure there is a second argument
         # Sends back an error message if there isn't
@@ -81,29 +87,61 @@ async def reddit(ctx, *, args):
             # If returnValue is -1, there was an error trying to get the posts
             # If returnValue is -2, the second argument is not a valid cache
             if returnValue == 0:
-                await ctx.send("```Finished refreshing the cache!```")
+
+                await ctx.send(
+                    embed=discord.Embed(
+                        title="It seems to have all went well!",
+                        description=f"The {parsedArgs[1]} cache has been refreshed!",
+                        color=Utils.EmbedColor
+                    )
+                )
+
                 print("pog it all went well, and cache was refreshed")
             elif returnValue == -1:
-                await ctx.send("```There was an error while trying to retrieve the posts!```")
+
+                await ctx.send(
+                    embed=discord.Embed(
+                        title="There was an error when trying to retrieve the posts!",
+                        description="This either means Reddit is down, r/hentai doesn't exist anymore, or the Reddit web app is broke.",
+                        color=Utils.EmbedColor
+                    )
+                )
+
                 print("yikes there was an error when trying to get the posts")
             elif returnValue == -2:
-                await ctx.send(f"```\"{parsedArgs[1]}\" is not a valid cache!\nSupported options:\n- top\n- hot```")
+
+                await ctx.send(embed=Utils.errorEmbed(f"\"{parsedArgs[1]}\" is not a valid cache!"))
+
                 print("smh the user never supplied a valid cache")
         except:
-            await ctx.send("```A cache argument was never supplied!```")
+            await ctx.send(embed=Utils.errorEmbed("A cache argument was never supplied!"))
             print("smh user never even supplied a cache argument")
     else:
-        await ctx.send(f"```\"{parsedArgs[0]}\" is not a supported argument of the command \".reddit\".```")
+        await ctx.send(embed=Utils.errorEmbed(f"\"{parsedArgs[0]}\" is not a valid argument for `.reddit`!"))
 
 
 # ".help" command
 @bot.command(aliases=["usage"])
 async def help(ctx):
-    await ctx.send("Usage:"
-                   "\nTo query an image from Reddit:"
-                   "\n```.reddit <top or hot>```"
-                   "\nTo refresh the cache (only use if you are seeing a lot of images get reused):"
-                   "\n```.reddit refresh <top or hot>```")
+    # Creates fancy help screen embed so it looks like I know what im doing
+
+    embed = discord.Embed(
+        title="Help and Usage",
+        color=Utils.EmbedColor
+    )
+
+    embed.add_field(name=".help/.usage", value="Shows this help screen", inline=False)
+    embed.add_field(name=".reddit <top or hot>", value="Picks a random image from the top or hot section on r/hentai.", inline=False)
+    embed.add_field(
+        name=".reddit refresh <top or hot>",
+        value="Refreshes the cache of the top or hot section."
+        "\n - Use this if you are starting to see a lot of image repeats"
+        "\n - Keep in mind that there aren't an infinite amount of images per day, so you could have just seen all of them"
+        "\n - The top cache resets every 10 minutes. The hot cache refreshes every 3.5 minutes",
+        inline=False
+    )
+
+    await ctx.send(embed=embed)
 
 
 # Tries to use the discord token

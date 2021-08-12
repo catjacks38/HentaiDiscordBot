@@ -4,10 +4,11 @@ EmbedColor = 0xeb006d
 
 
 # A function for making it easier to make consistent Reddit image embeds
-def redditEmbed(imageUrl, user):
+def redditEmbed(submission):
         embed = discord.Embed(title=":arrow_down: Look, Hentai! :arrow_down:", color=EmbedColor)
-        embed.set_author(name=f"Hentai requested by {user.name}", icon_url=user.avatar_url)
-        embed.set_image(url=imageUrl)
+        embed.set_author(name=f"Hentai posted by u/{submission.author.name}", icon_url=submission.author.icon_img)
+        embed.add_field(name="Submission Link:", value=f"[{submission.shortlink}](url)", inline=False)
+        embed.set_image(url=submission.url)
 
         return embed
 

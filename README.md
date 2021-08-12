@@ -22,9 +22,7 @@ To start the bot, type in
 - Shows help/usage screen
 
 `.reddit <top or hot>`
-- Shows a random image from the choosen section of reddit (top or hot)
+- Shows a random image from the chosen section of reddit (top or hot)
 
 `.reddit refresh <top or hot>`
-- Refreshes the top or hot cache of image links. Use this command if you are starting to see a lot of image get repeated.
-- The top cache is automatically refreshed every 10 minutes
-- The hot cache is automatically refreshed every 3.5 minutes
+- Refreshes the top or hot cache of image links.

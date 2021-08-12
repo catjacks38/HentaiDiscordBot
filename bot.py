@@ -59,7 +59,19 @@ async def reddit(ctx, *, args):
         if isinstance(submissions, int):
             print(f"Error! Function returned {submissions}")
         else:
-            await ctx.send(embed=Utils.redditEmbed(random.choice(submissions).url, ctx.message.author))
+            # If submissions length is more than zero, a random submission will be chosen and removed from the submissions
+            # Else, The cache will be refreshed, then a random submission will be chosen and removed from the submissions
+            if len(submissions) > 0:
+                choice = random.choice(submissions)
+                imageScrapperReddit.Remove(ctx.guild, "top", choice)
+            else:
+                imageScrapperReddit.RefreshCache("top", ctx.guild)
+                submissions = imageScrapperReddit.Get("top", ctx.guild)
+
+                choice = random.choice(submissions)
+                imageScrapperReddit.Remove(ctx.guild, "top", choice)
+
+            await ctx.send(embed=Utils.redditEmbed(choice))
 
     elif parsedArgs[0] == "hot":
         submissions = imageScrapperReddit.Get("hot", ctx.guild)
@@ -69,7 +81,19 @@ async def reddit(ctx, *, args):
         if isinstance(submissions, int):
             print(f"Error! Function returned {submissions}")
         else:
-            await ctx.send(embed=Utils.redditEmbed(random.choice(submissions).url, ctx.message.author))
+            # If submissions length is more than zero, a random submission will be chosen and removed from the submissions
+            # Else, The cache will be refreshed, then a random submission will be chosen and removed from the submissions
+            if len(submissions) > 0:
+                choice = random.choice(submissions)
+                imageScrapperReddit.Remove(ctx.guild, "hot", choice)
+            else:
+                imageScrapperReddit.RefreshCache("hot", ctx.guild)
+                submissions = imageScrapperReddit.Get("hot", ctx.guild)
+
+                choice = random.choice(submissions)
+                imageScrapperReddit.Remove(ctx.guild, "hot", choice)
+
+            await ctx.send(embed=Utils.redditEmbed(choice))
     elif parsedArgs[0] == "refresh":
 
         embed = discord.Embed(title="Refreshing the cache...", color=Utils.EmbedColor)
@@ -102,7 +126,7 @@ async def reddit(ctx, *, args):
                 await ctx.send(
                     embed=discord.Embed(
                         title="There was an error when trying to retrieve the posts!",
-                        description="This either means Reddit is down, r/hentai doesn't exist anymore, or the Reddit web app is broke.",
+                        description="This either means Reddit is down or the Reddit web app is broke.",
                         color=Utils.EmbedColor
                     )
                 )
@@ -134,10 +158,17 @@ async def help(ctx):
     embed.add_field(name=".reddit <top or hot>", value="Picks a random image from the top or hot section on r/hentai.", inline=False)
     embed.add_field(
         name=".reddit refresh <top or hot>",
-        value="Refreshes the cache of the top or hot section."
-        "\n - Use this if you are starting to see a lot of image repeats"
-        "\n - Keep in mind that there aren't an infinite amount of images per day, so you could have just seen all of them"
-        "\n - The top cache resets every 10 minutes. The hot cache refreshes every 3.5 minutes",
+        value="Refreshes the cache of the top or hot section.",
+        inline=False
+    )
+    embed.add_field(
+        name="Project Homepage:",
+        value="[https://github.com/catjacks38/HentaiDiscordBot](url)",
+        inline=False
+    )
+    embed.add_field(
+        name="Submit any Bugs or Feature Requests Here:",
+        value="[https://github.com/catjacks38/HentaiDiscordBot/issues](url)",
         inline=False
     )
 

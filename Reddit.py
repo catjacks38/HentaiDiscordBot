@@ -1,24 +1,12 @@
 import praw
-import time
 import discord_variables_plugin
-
-
-# A class to store the time and a list image urls for the caches, because storing it all in a list caused an error. T_T
-class Submissions:
-    def __init__(self, time, submissions):
-        self.time = time
-        self.submissions = submissions
 
 
 # A class for scrapping the images off of r/hentai
 class ImageScrapper:
-    # How long until automatic cache refresh (stored in seconds)
-    topCacheRefreshTime = 600
-    hotCacheRefreshTime = 210
-
     # The limit on how many posts to grab
-    hotLimit = 300
-    topLimit = 300
+    topLimit = 200
+    hotLimit = 200
 
     # Server variables file path
     serverVarsFp = "server.vars"
@@ -56,8 +44,8 @@ class ImageScrapper:
             if url[:18] == "https://i.redd.it/" or url[:20] == "https://i.imgur.com/":
                 submissions.append(post)
 
-        # Saves the posts and the time to serverVars
-        self.__serverVars.set(server, section, Submissions(int(time.time()), submissions))
+        # Saves the posts to serverVars
+        self.__serverVars.set(server, section, submissions)
         self.__serverVars.save(self.serverVarsFp)
 
         return 0
@@ -68,37 +56,55 @@ class ImageScrapper:
         if section == "top":
             submissions = self.__serverVars.get(server, "top")
 
-            # Checks if the automatic refresh time has not been reached
-            # Refreshes cache if it has
+            # Refreshes cache if there is no cache
             if submissions != -1:
-                if int(time.time()) - submissions.time < self.topCacheRefreshTime:
-                    return submissions.submissions
+                return submissions
 
             returnValue = self.RefreshCache("top", server)
 
-            # Loads the top Submission object, and returns the submissions variable if returnValue is 0
+            # Loads the top submissions, and returns the submissions variable if returnValue is 0
             # If returnValue is not zero, the function will return returnValue
             if returnValue == 0:
-                return self.__serverVars.get(server, "top").submissions
+                return self.__serverVars.get(server, "top")
             else:
                 return returnValue
 
         elif section == "hot":
             submissions = self.__serverVars.get(server, "hot")
 
-            # Checks if the automatic refresh time has not been reached
-            # Refreshes cache if it has
+            # Refreshes cache if there is no cache
             if submissions != -1:
-                if int(time.time()) - submissions.time < self.hotCacheRefreshTime:
-                    return submissions.submissions
+                return submissions
 
             returnValue = self.RefreshCache("hot", server)
 
-            # Loads the hot Submission object, and returns the submissions variable if returnValue is 0
+            # Loads the hot submissions, and returns the submissions variable if returnValue is 0
             # If returnValue is not zero, the function will return returnValue
             if returnValue == 0:
-                return self.__serverVars.get(server, "hot").submissions
+                return self.__serverVars.get(server, "hot")
             else:
                 return returnValue
+        else:
+            return -2
+
+    def Remove(self, server, section, submission):
+        if section == "top":
+            try:
+                submissions = self.__serverVars.get(server, "top")
+                submissions.remove(submission)
+
+                self.__serverVars.set(server, "top", submissions)
+                self.__serverVars.save(self.serverVarsFp)
+            except:
+                return -1
+        elif section == "hot":
+            try:
+                submissions = self.__serverVars.get(server, "hot")
+                submissions.remove(submission)
+
+                self.__serverVars.set(server, "hot", submissions)
+                self.__serverVars.save(self.serverVarsFp)
+            except:
+                return -1
         else:
             return -2

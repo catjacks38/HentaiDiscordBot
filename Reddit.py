@@ -1,6 +1,6 @@
 import praw
-import pickle
 import time
+import discord_variables_plugin
 
 
 # A class to store the time and a list image urls for the caches, because storing it all in a list caused an error. T_T
@@ -17,28 +17,25 @@ class ImageScrapper:
     hotCacheRefreshTime = 210
 
     # The limit on how many posts to grab
-    hotLimit = 200
-    topLimit = 200
+    hotLimit = 300
+    topLimit = 300
+
+    # Server variables file path
+    serverVarsFp = "server.vars"
 
     def __init__(self, clientID, clientSecret):
         # Creates bot
         self.__bot = praw.Reddit(user_agent="Image Scrapper Thing (by u/catjacks38)", client_id=clientID, client_secret=clientSecret)
+        self.__serverVars = discord_variables_plugin.ServerVariables()
 
         # Tries to read the cache files--sets them to False if they do not exist or can't be read
-        try:
-            with open("top.post", "rb") as topFile:
-                self.__top = topFile.read()
-        except:
-            self.__top = False
+        returnValue = self.__serverVars.load(self.serverVarsFp)
 
-        try:
-            with open("hot.post") as hotFile:
-                self.__hot = hotFile.read()
-        except:
-            self.__hot = False
+        if returnValue == -1:
+            self.__serverVars.save(self.serverVarsFp)
 
-    def RefreshCache(self, section):
-        images = []
+    def RefreshCache(self, section, server):
+        submissions = []
 
         # Tries to get the submissions, and returns -1 if it fails
         # If section is not a valid section, the function returns -2
@@ -57,61 +54,50 @@ class ImageScrapper:
 
             # Only appends the URL if it is an image URL
             if url[:18] == "https://i.redd.it/" or url[:20] == "https://i.imgur.com/":
-                images.append(url)
+                submissions.append(post)
 
-        # Saves the posts and the time to the correct cache file
-        if section == "top":
-            with open("top.post", "wb") as topFile:
-                pickle.dump(Submissions(int(time.time()), images), topFile)
-
-            with open("top.post", "rb") as topFile:
-                self.__top = topFile.read()
-
-        elif section == "hot":
-            with open("hot.post", "wb") as hotFile:
-                pickle.dump(Submissions(int(time.time()), images), hotFile)
-
-            with open("hot.post", "rb") as hotFile:
-                self.__hot = hotFile.read()
+        # Saves the posts and the time to serverVars
+        self.__serverVars.set(server, section, Submissions(int(time.time()), submissions))
+        self.__serverVars.save(self.serverVarsFp)
 
         return 0
 
-    def Get(self, section):
+    def Get(self, section, server):
 
         # If section is not a valid section, the function returns -2
         if section == "top":
-            if self.__top:
-                submissions = pickle.loads(self.__top)
+            submissions = self.__serverVars.get(server, "top")
 
-                # Checks if the automatic refresh time has not been reached
-                # Refreshes cache if it has
+            # Checks if the automatic refresh time has not been reached
+            # Refreshes cache if it has
+            if submissions != -1:
                 if int(time.time()) - submissions.time < self.topCacheRefreshTime:
                     return submissions.submissions
 
-            returnValue = self.RefreshCache("top")
+            returnValue = self.RefreshCache("top", server)
 
             # Loads the top Submission object, and returns the submissions variable if returnValue is 0
             # If returnValue is not zero, the function will return returnValue
             if returnValue == 0:
-                return pickle.loads(self.__top).submissions
+                return self.__serverVars.get(server, "top").submissions
             else:
                 return returnValue
 
         elif section == "hot":
-            if self.__hot:
-                submissions = pickle.loads(self.__hot)
+            submissions = self.__serverVars.get(server, "hot")
 
-                # Checks if the automatic refresh time has not been reached
-                # Refreshes cache if it has
+            # Checks if the automatic refresh time has not been reached
+            # Refreshes cache if it has
+            if submissions != -1:
                 if int(time.time()) - submissions.time < self.hotCacheRefreshTime:
                     return submissions.submissions
 
-            returnValue = self.RefreshCache("hot")
+            returnValue = self.RefreshCache("hot", server)
 
             # Loads the hot Submission object, and returns the submissions variable if returnValue is 0
             # If returnValue is not zero, the function will return returnValue
             if returnValue == 0:
-                return pickle.loads(self.__hot).submissions
+                return self.__serverVars.get(server, "hot").submissions
             else:
                 return returnValue
         else:

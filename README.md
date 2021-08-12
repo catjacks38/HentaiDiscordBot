@@ -6,6 +6,11 @@
 ## Script Requirements
 - discord.py
 - praw
+- discord_variables_plugin
+
+## Install Script Requirements
+- Windows: `pip install -r requirements.txt`
+- Linux: `pip3 install -r requirements.txt`
 
 ## CLI Usage
 To start the bot, type in 

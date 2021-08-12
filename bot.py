@@ -52,24 +52,24 @@ async def reddit(ctx, *, args):
     # Checks if the first argument is valid
     # Sends back error if the argument is invalid
     if parsedArgs[0] == "top":
-        submissions = imageScrapperReddit.Get("top")
+        submissions = imageScrapperReddit.Get("top", ctx.guild)
 
         # Checks to make sure the Get function returns a list
         # Prints error message if it doesn't
         if isinstance(submissions, int):
             print(f"Error! Function returned {submissions}")
         else:
-            await ctx.send(embed=Utils.redditEmbed(random.choice(submissions), ctx.message.author))
+            await ctx.send(embed=Utils.redditEmbed(random.choice(submissions).url, ctx.message.author))
 
     elif parsedArgs[0] == "hot":
-        submissions = imageScrapperReddit.Get("hot")
+        submissions = imageScrapperReddit.Get("hot", ctx.guild)
 
         # Checks to make sure the Get function returns a list
         # Prints error message if it doesn't
         if isinstance(submissions, int):
             print(f"Error! Function returned {submissions}")
         else:
-            await ctx.send(embed=Utils.redditEmbed(random.choice(submissions), ctx.message.author))
+            await ctx.send(embed=Utils.redditEmbed(random.choice(submissions).url, ctx.message.author))
     elif parsedArgs[0] == "refresh":
 
         embed = discord.Embed(title="Refreshing the cache...", color=Utils.EmbedColor)
@@ -80,7 +80,7 @@ async def reddit(ctx, *, args):
         # Checks to make sure there is a second argument
         # Sends back an error message if there isn't
         try:
-            returnValue = imageScrapperReddit.RefreshCache(parsedArgs[1])
+            returnValue = imageScrapperReddit.RefreshCache(parsedArgs[1], ctx.guild)
             print(f"Attempting to refresh the {parsedArgs[1]} cache...")
 
             # Checks to make sure returnValue is 0
@@ -123,7 +123,7 @@ async def reddit(ctx, *, args):
 # ".help" command
 @bot.command(aliases=["usage"])
 async def help(ctx):
-    # Creates fancy help screen embed so it looks like I know what im doing
+    # Creates fancy help screen embed, so it looks like I know what im doing
 
     embed = discord.Embed(
         title="Help and Usage",

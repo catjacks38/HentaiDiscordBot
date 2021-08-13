@@ -94,7 +94,7 @@ class ImageScrapper:
             # Removes top submission from self.__serverVars
             # If it fails, -1 is returned
             try:
-                submissions = self.__serverVars.get(server, "top")+
+                submissions = self.__serverVars.get(server, "top")
                 submissions.remove(submission)
 
                 self.__serverVars.set(server, "top", submissions)

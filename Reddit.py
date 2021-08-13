@@ -88,9 +88,13 @@ class ImageScrapper:
             return -2
 
     def Remove(self, server, section, submission):
+        # Checks to make sure a valid section was passed
+        # Returns -2 if it wasn't a valid section
         if section == "top":
+            # Removes top submission from self.__serverVars
+            # If it fails, -1 is returned
             try:
-                submissions = self.__serverVars.get(server, "top")
+                submissions = self.__serverVars.get(server, "top")+
                 submissions.remove(submission)
 
                 self.__serverVars.set(server, "top", submissions)
@@ -98,6 +102,8 @@ class ImageScrapper:
             except:
                 return -1
         elif section == "hot":
+            # Removes hot submission from self.__serverVars
+            # If it fails, -1 is returned
             try:
                 submissions = self.__serverVars.get(server, "hot")
                 submissions.remove(submission)

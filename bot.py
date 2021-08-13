@@ -52,7 +52,13 @@ async def reddit(ctx, *, args):
     # Checks if the first argument is valid
     # Sends back error if the argument is invalid
     if parsedArgs[0] == "top":
-        submissions = imageScrapperReddit.Get("top", ctx.guild)
+        try:
+            submissions = imageScrapperReddit.Get(ctx.guild, parsedArgs[1], "top")
+        except:
+            parsedArgs.append("hentai")
+            submissions = imageScrapperReddit.Get(ctx.guild, parsedArgs[1], "top")
+
+        print(len(submissions))
 
         # Checks to make sure the Get function returns a list
         # Prints error message if it doesn't
@@ -63,18 +69,24 @@ async def reddit(ctx, *, args):
             # Else, The cache will be refreshed, then a random submission will be chosen and removed from the submissions
             if len(submissions) > 0:
                 choice = random.choice(submissions)
-                imageScrapperReddit.Remove(ctx.guild, "top", choice)
+                imageScrapperReddit.Remove(ctx.guild, parsedArgs[1], "top", choice)
             else:
-                imageScrapperReddit.RefreshCache("top", ctx.guild)
-                submissions = imageScrapperReddit.Get("top", ctx.guild)
+                imageScrapperReddit.RefreshCache(ctx.guild, parsedArgs[1], "top")
+                submissions = imageScrapperReddit.Get(ctx.guild, parsedArgs[1], "top")
 
                 choice = random.choice(submissions)
-                imageScrapperReddit.Remove(ctx.guild, "top", choice)
+                imageScrapperReddit.Remove(ctx.guild, parsedArgs[1], "top", choice)
 
             await ctx.send(embed=Utils.redditEmbed(choice))
 
     elif parsedArgs[0] == "hot":
-        submissions = imageScrapperReddit.Get("hot", ctx.guild)
+        try:
+            submissions = imageScrapperReddit.Get(ctx.guild, parsedArgs[1], "hot")
+        except:
+            parsedArgs.append("hentai")
+            submissions = imageScrapperReddit.Get(ctx.guild, parsedArgs[1], "hot")
+
+        print(len(submissions))
 
         # Checks to make sure the Get function returns a list
         # Prints error message if it doesn't
@@ -85,13 +97,13 @@ async def reddit(ctx, *, args):
             # Else, The cache will be refreshed, then a random submission will be chosen and removed from the submissions
             if len(submissions) > 0:
                 choice = random.choice(submissions)
-                imageScrapperReddit.Remove(ctx.guild, "hot", choice)
+                imageScrapperReddit.Remove(ctx.guild, parsedArgs[1], "hot", choice)
             else:
-                imageScrapperReddit.RefreshCache("hot", ctx.guild)
-                submissions = imageScrapperReddit.Get("hot", ctx.guild)
+                imageScrapperReddit.RefreshCache(ctx.guild, parsedArgs[1], "hot")
+                submissions = imageScrapperReddit.Get(ctx.guild, parsedArgs[1], "hot")
 
                 choice = random.choice(submissions)
-                imageScrapperReddit.Remove(ctx.guild, "hot", choice)
+                imageScrapperReddit.Remove(ctx.guild, parsedArgs[1], "hot", choice)
 
             await ctx.send(embed=Utils.redditEmbed(choice))
     elif parsedArgs[0] == "refresh":

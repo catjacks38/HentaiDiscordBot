@@ -26,7 +26,7 @@ class ImageScrapper:
 
     def RefreshCache(self, server, subreddit, section):
         print("refreshing")
-        
+
         submissions = []
         sr = "hentai"
 
@@ -54,8 +54,15 @@ class ImageScrapper:
             if url[:18] == "https://i.redd.it/" or url[:20] == "https://i.imgur.com/":
                 submissions.append(post)
 
+        newCache = self.__serverVars.get(server, sr)
+
+        if newCache == -1:
+            newCache = {section : submissions}
+        else:
+            newCache[section] = submissions
+
         # Saves the posts to serverVars
-        self.__serverVars.set(server, sr, {section : submissions})
+        self.__serverVars.set(server, sr, newCache)
         self.__serverVars.save(self.serverVarsFp)
 
         return 0

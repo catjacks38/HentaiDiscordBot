@@ -58,8 +58,6 @@ async def reddit(ctx, *, args):
             parsedArgs.append("hentai")
             submissions = imageScrapperReddit.Get(ctx.guild, parsedArgs[1], "top")
 
-        print(len(submissions))
-
         # Checks to make sure the Get function returns a list
         # Prints error message if it doesn't
         if isinstance(submissions, int):
@@ -85,8 +83,6 @@ async def reddit(ctx, *, args):
         except:
             parsedArgs.append("hentai")
             submissions = imageScrapperReddit.Get(ctx.guild, parsedArgs[1], "hot")
-
-        print(len(submissions))
 
         # Checks to make sure the Get function returns a list
         # Prints error message if it doesn't

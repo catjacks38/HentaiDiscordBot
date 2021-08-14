@@ -38,7 +38,7 @@ else:
 imageScrapperReddit = Reddit.ImageScrapper(options[1], options[2])
 
 
-# Prints a success message once the bot is ready
+# Prints a ready message once the bot is ready
 @bot.event
 async def on_ready():
     print("lol bot is ready")
@@ -51,9 +51,18 @@ async def reddit(ctx, *, args):
 
     # Checks if the first argument is valid
     # Sends back error if the argument is invalid
+
+    # .reddit top <subreddit or subreddit index>
     if parsedArgs[0] == "top":
+        # Checks if the seconds argument is a string name of the subreddit or an index of the subreddit
+        # If it is nether, it will be defaulted to r/hentai
         try:
-            submissions = imageScrapperReddit.Get(ctx.guild, parsedArgs[1], "top")
+            parsedArgs[1]
+
+            try:
+                submissions = imageScrapperReddit.Get(ctx.guild, imageScrapperReddit.subreddits[int(parsedArgs[1])], "top")
+            except:
+                submissions = imageScrapperReddit.Get(ctx.guild, parsedArgs[1], "top")
         except:
             parsedArgs.append("hentai")
             submissions = imageScrapperReddit.Get(ctx.guild, parsedArgs[1], "top")
@@ -77,9 +86,16 @@ async def reddit(ctx, *, args):
 
             await ctx.send(embed=Utils.redditEmbed(choice))
 
+    # .reddit hot <subreddit or subreddit index>
     elif parsedArgs[0] == "hot":
+        # Checks if the seconds argument is a string name of the subreddit or an index of the subreddit
+        # If it is nether, it will be defaulted to r/hentai
         try:
-            submissions = imageScrapperReddit.Get(ctx.guild, parsedArgs[1], "hot")
+            parsedArgs[1]
+            try:
+                submissions = imageScrapperReddit.Get(ctx.guild, imageScrapperReddit.subreddits[int(parsedArgs[1])], "hot")
+            except:
+                submissions = imageScrapperReddit.Get(ctx.guild, parsedArgs[1], "hot")
         except:
             parsedArgs.append("hentai")
             submissions = imageScrapperReddit.Get(ctx.guild, parsedArgs[1], "hot")
@@ -102,6 +118,8 @@ async def reddit(ctx, *, args):
                 imageScrapperReddit.Remove(ctx.guild, parsedArgs[1], "hot", choice)
 
             await ctx.send(embed=Utils.redditEmbed(choice))
+
+    # .reddit refresh <subreddit name or subreddit index>
     elif parsedArgs[0] == "refresh":
 
         embed = discord.Embed(title="Refreshing the cache...", color=Utils.EmbedColor)
@@ -109,45 +127,48 @@ async def reddit(ctx, *, args):
 
         await ctx.send(embed=embed)
 
-        # Checks to make sure there is a second argument
-        # Sends back an error message if there isn't
+        # Checks if the seconds argument is a string name of the subreddit or an index of the subreddit
+        # If it is nether, it will be defaulted to r/hentai
         try:
-            returnValue = imageScrapperReddit.RefreshCache(parsedArgs[1], ctx.guild)
-            print(f"Attempting to refresh the {parsedArgs[1]} cache...")
-
-            # Checks to make sure returnValue is 0
-            # If returnValue is -1, there was an error trying to get the posts
-            # If returnValue is -2, the second argument is not a valid cache
-            if returnValue == 0:
-
-                await ctx.send(
-                    embed=discord.Embed(
-                        title="It seems to have all went well!",
-                        description=f"The {parsedArgs[1]} cache has been refreshed!",
-                        color=Utils.EmbedColor
-                    )
-                )
-
-                print("pog it all went well, and cache was refreshed")
-            elif returnValue == -1:
-
-                await ctx.send(
-                    embed=discord.Embed(
-                        title="There was an error when trying to retrieve the posts!",
-                        description="This either means Reddit is down or the Reddit web app is broke.",
-                        color=Utils.EmbedColor
-                    )
-                )
-
-                print("yikes there was an error when trying to get the posts")
-            elif returnValue == -2:
-
-                await ctx.send(embed=Utils.errorEmbed(f"\"{parsedArgs[1]}\" is not a valid cache!"))
-
-                print("smh the user never supplied a valid cache")
+            parsedArgs[1]
+            try:
+                topReturn = imageScrapperReddit.RefreshCache(ctx.guild, imageScrapperReddit.subreddits[int(parsedArgs[1])], "top")
+                hotReturn = imageScrapperReddit.RefreshCache(ctx.guild, imageScrapperReddit.subreddits[int(parsedArgs[1])], "hot")
+            except:
+                topReturn = imageScrapperReddit.RefreshCache(ctx.guild, parsedArgs[1], "top")
+                hotReturn = imageScrapperReddit.RefreshCache(ctx.guild, parsedArgs[1], "hot")
         except:
-            await ctx.send(embed=Utils.errorEmbed("A cache argument was never supplied!"))
-            print("smh user never even supplied a cache argument")
+            parsedArgs.append("hentai")
+            topReturn = imageScrapperReddit.RefreshCache(ctx.guild, parsedArgs[1], "top")
+            hotReturn = imageScrapperReddit.RefreshCache(ctx.guild, parsedArgs[1], "hot")
+
+        # Checks to make sure returnValue is 0
+        # If returnValue is -1, there was an error trying to get the posts
+        # If returnValue is -2, the second argument is not a valid cache
+        if hotReturn == 0 and topReturn == 0:
+
+            await ctx.send(
+                embed=discord.Embed(
+                    title="It seems to have all went well!",
+                    description=f"The cache has been refreshed!",
+                    color=Utils.EmbedColor
+                )
+            )
+
+        elif hotReturn == -1 or topReturn == -1:
+
+            await ctx.send(
+                embed=discord.Embed(
+                    title="There was an error when trying to retrieve the posts!",
+                    description="This either means Reddit is down or the Reddit web app is broke.",
+                    color=Utils.EmbedColor
+                )
+            )
+
+    # .reddit subreddits
+    elif parsedArgs[0] == "subreddits":
+        await ctx.send(embed=Utils.supportedSubredditsEmbed(imageScrapperReddit.subreddits))
+
     else:
         await ctx.send(embed=Utils.errorEmbed(f"\"{parsedArgs[0]}\" is not a valid argument for `.reddit`!"))
 
@@ -162,11 +183,28 @@ async def help(ctx):
         color=Utils.EmbedColor
     )
 
-    embed.add_field(name=".help/.usage", value="Shows this help screen", inline=False)
-    embed.add_field(name=".reddit <top or hot>", value="Picks a random image from the top or hot section on r/hentai.", inline=False)
+    embed.add_field(name=".help/.usage", value="Shows this help screen.", inline=False)
     embed.add_field(
-        name=".reddit refresh <top or hot>",
-        value="Refreshes the cache of the top or hot section.",
+        name=".reddit <top or hot> <subreddit or subreddit index>",
+        value="Picks a random image from the top or hot section on the chosen subreddit or subreddit index."
+              "\nDefaults to r/hentai if the subreddit or subreddit index is not valid or no argument is supplied."
+              "\nExamples:"
+              "\n`.reddit top hentai`"
+              "\n`.reddit top 0`",
+        inline=False
+    )
+    embed.add_field(
+        name=".reddit refresh <subreddit or subreddit index>",
+        value="Refreshes the cache of the chosen subreddit or subreddit index."
+              "\nDefaults to r/hentai if the subreddit or subreddit index is not valid or no argument is supplied."
+              "\nExamples:"
+              "\n`.reddit refresh hentai`"
+              "\n`.reddit refresh 0`",
+        inline=False
+    )
+    embed.add_field(
+        name=".reddit subreddits",
+        value="Lists all of the supported subreddits.",
         inline=False
     )
     embed.add_field(

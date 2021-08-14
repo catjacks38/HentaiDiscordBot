@@ -2,7 +2,7 @@ import praw
 import discord_variables_plugin
 
 
-# A class for scrapping the images off of r/hentai
+# A class for scrapping the images off of subreddits
 class ImageScrapper:
     # The limit on how many posts to grab
     topLimit = 200
@@ -25,7 +25,6 @@ class ImageScrapper:
             self.__serverVars.save(self.serverVarsFp)
 
     def RefreshCache(self, server, subreddit, section):
-        print("refreshing")
 
         submissions = []
         sr = "hentai"
@@ -46,6 +45,8 @@ class ImageScrapper:
                 return -2
         except:
             return -1
+
+        print(f"Refreshing {section} of r/{sr}")
 
         for post in posts:
             url = post.url

@@ -1,6 +1,7 @@
 import Utils
 import random
 import Reddit
+import Nhentai
 import pickle
 import argparse
 import discord
@@ -36,6 +37,7 @@ else:
         exit(-1)
 
 imageScrapperReddit = Reddit.ImageScrapper(options[1], options[2])
+nhentaiScrapper = Nhentai.NhentaiScrapper()
 
 
 # Prints a ready message once the bot is ready
@@ -171,6 +173,16 @@ async def reddit(ctx, *, args):
 
     else:
         await ctx.send(embed=Utils.errorEmbed(f"\"{parsedArgs[0]}\" is not a valid argument for `.reddit`!"))
+
+
+# ".nhentai" command
+@bot.command()
+async def nhentai(ctx, *, args):
+    parsedArgs = args.split(" ")
+
+    if parsedArgs[0] == "random":
+        print(Utils.nhentaiParseKeys(args))
+        await ctx.send(nhentaiScrapper.getRandom().tags)
 
 
 # ".help" command

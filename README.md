@@ -11,6 +11,7 @@ Hopefully I don't regret giving this link out, but here it is: [Invite Link](htt
 - discord.py
 - praw
 - discord_variables_plugin
+- Nhentai-API
 
 ## Install Script Requirements
 - Windows: `pip install -r requirements.txt`

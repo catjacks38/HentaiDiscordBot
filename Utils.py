@@ -26,3 +26,20 @@ def supportedSubredditsEmbed(subreddits):
                 stringList += f"\n{i} - {subreddits[i]}"
 
         return discord.Embed(title="Supported subreddits", description=stringList, color=EmbedColor)
+
+
+def nhentaiParseKeys(args):
+        whitelistIDX = args.find("whitelist=")
+        blacklistIDX = args.find("blacklist=")
+
+        if whitelistIDX == -1:
+                whitelistTags = None
+        else:
+                whitelistTags = args[whitelistIDX + len("whitelist="):blacklistIDX - 1 if blacklistIDX > whitelistIDX else len(args)].split(", ")
+
+        if blacklistIDX == -1:
+                blacklistIDX = None
+        else:
+                blacklistTags = args[blacklistIDX + len("blacklist="):whitelistIDX - 1 if whitelistIDX > blacklistIDX else len(args)].split(", ")
+
+        return (whitelistTags, blacklistTags)

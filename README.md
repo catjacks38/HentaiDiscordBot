@@ -37,7 +37,7 @@ To start the bot again, type in
 - `.reddit top hentai`
 - `.reddit top 0`
 
-### `.reddit refresh <top or hot>`
+### `.reddit refresh <subreddit or index>`
 - Refreshes the cache of the chosen subreddit or subreddit index.
 - Defaults to r/hentai if the subreddit or subreddit index is not valid or no argument is supplied.
 ### Examples:

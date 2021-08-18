@@ -181,8 +181,13 @@ async def nhentai(ctx, *, args):
     parsedArgs = args.split(" ")
 
     if parsedArgs[0] == "random":
-        print(Utils.nhentaiParseKeys(args))
         await ctx.send(nhentaiScrapper.getRandom().tags)
+    elif parsedArgs[0] == "query":
+        required, banned = Utils.nhentaiParseKeys(args)
+
+        cover, doujin = nhentaiScrapper.query("", banned, required)
+
+        await ctx.send(embed=Utils.doujinEmbed(cover, doujin))
 
 
 # ".help" command

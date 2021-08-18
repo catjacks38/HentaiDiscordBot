@@ -29,17 +29,28 @@ def supportedSubredditsEmbed(subreddits):
 
 
 def nhentaiParseKeys(args):
-        whitelistIDX = args.find("whitelist=")
-        blacklistIDX = args.find("blacklist=")
+        requiredIDX = args.find("required=")
+        bannedIDX = args.find("banned=")
 
-        if whitelistIDX == -1:
-                whitelistTags = None
+        if requiredIDX == -1:
+                requiredTags = None
         else:
-                whitelistTags = args[whitelistIDX + len("whitelist="):blacklistIDX - 1 if blacklistIDX > whitelistIDX else len(args)].split(", ")
+                requiredTags = args[requiredIDX + len("required="):bannedIDX - 1 if bannedIDX > requiredIDX else len(args)].split(", ")
 
-        if blacklistIDX == -1:
-                blacklistIDX = None
+        if bannedIDX == -1:
+                bannedTags = None
         else:
-                blacklistTags = args[blacklistIDX + len("blacklist="):whitelistIDX - 1 if whitelistIDX > blacklistIDX else len(args)].split(", ")
+                bannedTags = args[bannedIDX + len("banned="):requiredIDX - 1 if requiredIDX > bannedIDX else len(args)].split(", ")
 
-        return (whitelistTags, blacklistTags)
+        return requiredTags, bannedTags
+
+
+def doujinEmbed(cover, doujin):
+        embed = discord.Embed(title=doujin.title, description=f"[https://nhentai.net/g/{doujin.id}](url)", color=EmbedColor)
+        embed.set_image(url=cover)
+        embed.add_field(name="Artists", value="".join(map(lambda x: str(x) + ", ", doujin.artists))[:-2], inline=False)
+        embed.add_field(name="Tags", value="".join(map(lambda x: str(x) + ", ", doujin.tags))[:-2], inline=False)
+        embed.add_field(name="Language Tags", value="".join(map(lambda x: str(x) + ", ", doujin.languages))[:-2], inline=False)
+        embed.set_footer(text=f"{doujin.total_pages} pages.")
+
+        return embed

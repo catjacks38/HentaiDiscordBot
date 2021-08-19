@@ -31,18 +31,54 @@ def supportedSubredditsEmbed(subreddits):
 def nhentaiParseKeys(args):
         requiredIDX = args.find("required=")
         bannedIDX = args.find("banned=")
+        defaultLangIDX = args.find("default_lang=")
 
         if requiredIDX == -1:
                 requiredTags = None
         else:
-                requiredTags = args[requiredIDX + len("required="):bannedIDX - 1 if bannedIDX > requiredIDX else len(args)].split(", ")
+                IDXList = []
+
+                if bannedIDX > requiredIDX:
+                        IDXList.append(bannedIDX)
+
+                if defaultLangIDX > requiredIDX:
+                        IDXList.append(defaultLangIDX)
+
+                stopIDX = len(args) if len(IDXList) == 0 else min(IDXList) - 1
+
+                requiredTags = args[requiredIDX + len("required="):stopIDX].split(", ")
 
         if bannedIDX == -1:
                 bannedTags = None
         else:
-                bannedTags = args[bannedIDX + len("banned="):requiredIDX - 1 if requiredIDX > bannedIDX else len(args)].split(", ")
+                IDXList = []
 
-        return requiredTags, bannedTags
+                if requiredIDX > bannedIDX:
+                        IDXList.append(requiredIDX)
+
+                if defaultLangIDX > bannedIDX:
+                        IDXList.append(defaultLangIDX)
+
+                stopIDX = len(args) if len(IDXList) == 0 else min(IDXList) - 1
+
+                bannedTags = args[bannedIDX + len("banned="):stopIDX].split(", ")
+
+        if defaultLangIDX == -1:
+                defaultLang = None
+        else:
+                IDXList = []
+
+                if requiredIDX > defaultLangIDX:
+                        IDXList.append(requiredIDX)
+
+                if bannedIDX > defaultLangIDX:
+                        IDXList.append(bannedIDX)
+
+                stopIDX = len(args) if len(IDXList) == 0 else min(IDXList) - 1
+
+                defaultLang = args[defaultLangIDX + len("default_lang="):stopIDX]
+
+        return requiredTags, bannedTags, defaultLang
 
 
 def doujinEmbed(cover, doujin):

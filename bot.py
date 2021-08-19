@@ -181,13 +181,31 @@ async def nhentai(ctx, *, args):
     parsedArgs = args.split(" ")
 
     if parsedArgs[0] == "random":
-        await ctx.send(nhentaiScrapper.getRandom().tags)
+        _, _, defaultLang = nhentaiScrapper.get(ctx.author)
+        returnValue = nhentaiScrapper.query("", None, None, defaultLang)
+
+        if returnValue == -1:
+            await ctx.send(embed=Utils.errorEmbed("There was an error while querying Nhentai!"))
+        else:
+            cover, doujin = returnValue
+            await ctx.send(embed=Utils.doujinEmbed(cover, doujin))
+
     elif parsedArgs[0] == "query":
-        required, banned = Utils.nhentaiParseKeys(args)
 
-        cover, doujin = nhentaiScrapper.query("", banned, required)
+        required, banned, defaultLang = nhentaiScrapper.get(ctx.author)
 
-        await ctx.send(embed=Utils.doujinEmbed(cover, doujin))
+        returnValue = nhentaiScrapper.query("", required, banned, defaultLang)
+
+        if returnValue == -1:
+            await ctx.send(embed=Utils.errorEmbed("There was an error while querying Nhentai!"))
+        else:
+            cover, doujin = returnValue
+            await ctx.send(embed=Utils.doujinEmbed(cover, doujin))
+
+    elif parsedArgs[0] == "set":
+        required, banned, defaultLang = Utils.nhentaiParseKeys(args)
+
+        nhentaiScrapper.set(ctx.author, required, banned, defaultLang)
 
 
 # ".help" command

@@ -1,5 +1,5 @@
 import praw
-import discord_variables_plugin
+from discord_variables_plugin import ServerVariables
 
 
 # A class for scrapping the images off of subreddits
@@ -16,7 +16,7 @@ class ImageScrapper:
     def __init__(self, clientID, clientSecret):
         # Creates bot
         self.__bot = praw.Reddit(user_agent="Image Scrapper Thing (by u/catjacks38)", client_id=clientID, client_secret=clientSecret)
-        self.__serverVars = discord_variables_plugin.ServerVariables()
+        self.__serverVars = ServerVariables()
 
         # Tries to read the cache files--sets them to False if they do not exist or can't be read
         returnValue = self.__serverVars.load(self.serverVarsFp)

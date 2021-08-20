@@ -180,45 +180,59 @@ async def reddit(ctx, *, args):
 async def nhentai(ctx, *, args):
     parsedArgs = args.split(" ")
 
+    # ".nhentai random"
     if parsedArgs[0] == "random":
+        # Gets the language of the user, and gets a random doujin of that language
         _, _, lang = nhentaiScrapper.get(ctx.author)
         returnValue = nhentaiScrapper.query("", None, None, lang)
 
+        # If the query failed, send an error message
+        # Else, send the doujin
         if returnValue == -1:
             await ctx.send(embed=Utils.errorEmbed("There was an error while querying Nhentai!"))
         else:
             cover, doujin = returnValue
             await ctx.send(embed=Utils.doujinEmbed(cover, doujin))
 
+    # ".nhentai query <search query>"
     elif parsedArgs[0] == "query":
-
+        # Gets the required, banned, and language tags of the user, and queries Nhentai with those tags and search query (if specified)
         required, banned, lang = nhentaiScrapper.get(ctx.author)
-
         returnValue = nhentaiScrapper.query(args[len("query "):], required, banned, lang)
 
+        # If the query failed, send an error message
+        # Else, send the doujin
         if returnValue == -1:
             await ctx.send(embed=Utils.errorEmbed("There was an error while querying Nhentai!"))
         else:
             cover, doujin = returnValue
             await ctx.send(embed=Utils.doujinEmbed(cover, doujin))
 
+    # ".nhentai set <parameters>"
     elif parsedArgs[0] == "set":
+        # Parses the parameters, and sets the user's saved tags to them
         required, banned, lang = Utils.nhentaiParseKeys(args)
-
         nhentaiScrapper.set(ctx.author, required, banned, lang)
 
+    # ".nhentai list"
     elif parsedArgs[0] == "list":
+        # Gets all of the saved tags of the user
         required, banned, lang = nhentaiScrapper.get(ctx.author)
 
+        # Creates an embed to display the tags
+        # If the tag is None, the string "None" will be sent, instead of an exception being thrown
         embed = discord.Embed(title=f"Saved tags of {ctx.author.name}", color=Utils.EmbedColor)
         embed.set_thumbnail(url=ctx.author.avatar_url)
         embed.add_field(name="Required: ", value="None" if not required else "".join(map(lambda x: str(x) + ", ", required))[:-2], inline=False)
         embed.add_field(name="Banned: ", value="None" if not banned else "".join(map(lambda x: str(x) + ", ", banned))[:-2], inline=False)
         embed.add_field(name="Language: ", value="None" if not lang else lang, inline=False)
 
+        # Sends the embed
         await ctx.send(embed=embed)
 
+    # ".nhentai clear"
     elif parsedArgs[0] == "clear":
+        # Clears all of the user's saved tags
         nhentaiScrapper.clear(ctx.author)
 
 

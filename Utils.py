@@ -31,7 +31,7 @@ def supportedSubredditsEmbed(subreddits):
 def nhentaiParseKeys(args):
         requiredIDX = args.find("required=")
         bannedIDX = args.find("banned=")
-        defaultLangIDX = args.find("default_lang=")
+        langIDX = args.find("lang=")
 
         if requiredIDX == -1:
                 requiredTags = None
@@ -41,8 +41,8 @@ def nhentaiParseKeys(args):
                 if bannedIDX > requiredIDX:
                         IDXList.append(bannedIDX)
 
-                if defaultLangIDX > requiredIDX:
-                        IDXList.append(defaultLangIDX)
+                if langIDX > requiredIDX:
+                        IDXList.append(langIDX)
 
                 stopIDX = len(args) if len(IDXList) == 0 else min(IDXList) - 1
 
@@ -56,37 +56,37 @@ def nhentaiParseKeys(args):
                 if requiredIDX > bannedIDX:
                         IDXList.append(requiredIDX)
 
-                if defaultLangIDX > bannedIDX:
-                        IDXList.append(defaultLangIDX)
+                if langIDX > bannedIDX:
+                        IDXList.append(langIDX)
 
                 stopIDX = len(args) if len(IDXList) == 0 else min(IDXList) - 1
 
                 bannedTags = args[bannedIDX + len("banned="):stopIDX].split(", ")
 
-        if defaultLangIDX == -1:
-                defaultLang = None
+        if langIDX == -1:
+                lang = None
         else:
                 IDXList = []
 
-                if requiredIDX > defaultLangIDX:
+                if requiredIDX > langIDX:
                         IDXList.append(requiredIDX)
 
-                if bannedIDX > defaultLangIDX:
+                if bannedIDX > langIDX:
                         IDXList.append(bannedIDX)
 
                 stopIDX = len(args) if len(IDXList) == 0 else min(IDXList) - 1
 
-                defaultLang = args[defaultLangIDX + len("default_lang="):stopIDX]
+                lang = args[langIDX + len("lang="):stopIDX]
 
-        return requiredTags, bannedTags, defaultLang
+        return None if requiredTags == [""] else requiredTags, None if bannedTags == [""] else bannedTags, lang
 
 
 def doujinEmbed(cover, doujin):
         embed = discord.Embed(title=doujin.title, description=f"[https://nhentai.net/g/{doujin.id}](url)", color=EmbedColor)
         embed.set_image(url=cover)
-        embed.add_field(name="Artists", value="".join(map(lambda x: str(x) + ", ", doujin.artists))[:-2], inline=False)
-        embed.add_field(name="Tags", value="".join(map(lambda x: str(x) + ", ", doujin.tags))[:-2], inline=False)
-        embed.add_field(name="Language Tags", value="".join(map(lambda x: str(x) + ", ", doujin.languages))[:-2], inline=False)
+        embed.add_field(name="Artists:", value="None" if len(doujin.artists) == 0 else "".join(map(lambda x: str(x) + ", ", doujin.artists))[:-2], inline=False)
+        embed.add_field(name="Tags:", value="None" if len(doujin.tags) == 0 else "".join(map(lambda x: str(x) + ", ", doujin.tags))[:-2], inline=False)
+        embed.add_field(name="Language Tags:", value="None" if len(doujin.languages) == 0 else "".join(map(lambda x: str(x) + ", ", doujin.languages))[:-2], inline=False)
         embed.set_footer(text=f"{doujin.total_pages} pages.")
 
         return embed

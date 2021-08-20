@@ -181,8 +181,8 @@ async def nhentai(ctx, *, args):
     parsedArgs = args.split(" ")
 
     if parsedArgs[0] == "random":
-        _, _, defaultLang = nhentaiScrapper.get(ctx.author)
-        returnValue = nhentaiScrapper.query("", None, None, defaultLang)
+        _, _, lang = nhentaiScrapper.get(ctx.author)
+        returnValue = nhentaiScrapper.query("", None, None, lang)
 
         if returnValue == -1:
             await ctx.send(embed=Utils.errorEmbed("There was an error while querying Nhentai!"))
@@ -192,9 +192,9 @@ async def nhentai(ctx, *, args):
 
     elif parsedArgs[0] == "query":
 
-        required, banned, defaultLang = nhentaiScrapper.get(ctx.author)
+        required, banned, lang = nhentaiScrapper.get(ctx.author)
 
-        returnValue = nhentaiScrapper.query("", required, banned, defaultLang)
+        returnValue = nhentaiScrapper.query(args[len("query "):], required, banned, lang)
 
         if returnValue == -1:
             await ctx.send(embed=Utils.errorEmbed("There was an error while querying Nhentai!"))
@@ -203,9 +203,23 @@ async def nhentai(ctx, *, args):
             await ctx.send(embed=Utils.doujinEmbed(cover, doujin))
 
     elif parsedArgs[0] == "set":
-        required, banned, defaultLang = Utils.nhentaiParseKeys(args)
+        required, banned, lang = Utils.nhentaiParseKeys(args)
 
-        nhentaiScrapper.set(ctx.author, required, banned, defaultLang)
+        nhentaiScrapper.set(ctx.author, required, banned, lang)
+
+    elif parsedArgs[0] == "list":
+        required, banned, lang = nhentaiScrapper.get(ctx.author)
+
+        embed = discord.Embed(title=f"Saved tags of {ctx.author.name}", color=Utils.EmbedColor)
+        embed.set_thumbnail(url=ctx.author.avatar_url)
+        embed.add_field(name="Required: ", value="None" if not required else "".join(map(lambda x: str(x) + ", ", required))[:-2], inline=False)
+        embed.add_field(name="Banned: ", value="None" if not banned else "".join(map(lambda x: str(x) + ", ", banned))[:-2], inline=False)
+        embed.add_field(name="Language: ", value="None" if not lang else lang, inline=False)
+
+        await ctx.send(embed=embed)
+
+    elif parsedArgs[0] == "clear":
+        nhentaiScrapper.clear(ctx.author)
 
 
 # ".help" command

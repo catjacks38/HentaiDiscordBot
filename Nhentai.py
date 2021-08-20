@@ -21,15 +21,15 @@ class NhentaiScrapper:
         if returnValue == -1:
             self.__userVars.save(self.userVarsFp)
 
-    def set(self, user, required, banned, defaultLang):
+    def set(self, user, required, banned, lang):
         if banned:
             self.__userVars.set(user, "banned", banned)
 
         if required:
             self.__userVars.set(user, "required", required)
 
-        if defaultLang:
-            self.__userVars.set(user, "defaultLang", defaultLang)
+        if lang:
+            self.__userVars.set(user, "lang", lang)
 
         self.__userVars.save(self.userVarsFp)
 
@@ -38,11 +38,15 @@ class NhentaiScrapper:
 
         banned = self.__userVars.get(user, "banned")
         required = self.__userVars.get(user, "required")
-        defaultLang = self.__userVars.get(user, "defaultLang")
+        lang = self.__userVars.get(user, "lang")
 
-        return required if required != -1 else None, banned if banned != -1 else None, defaultLang if defaultLang != -1 else None
+        return required if required != -1 else None, banned if banned != -1 else None, lang if lang != -1 else None
 
-    def query(self, query, required, banned, defaultLang):
+    def clear(self, user):
+        self.__userVars.clearUser(user)
+        self.__userVars.save(self.userVarsFp)
+
+    def query(self, query, required, banned, lang):
         searchQuery = ""
 
         if required:
@@ -53,8 +57,8 @@ class NhentaiScrapper:
             for tag in banned + self.bannedTags:
                 searchQuery += f"-{tag} "
 
-        if defaultLang:
-            searchQuery += f"+{defaultLang} "
+        if lang:
+            searchQuery += f"+{lang} "
 
         for tag in self.bannedTags:
             searchQuery += f"-{tag} "
@@ -63,10 +67,13 @@ class NhentaiScrapper:
 
         try:
             pages = self.__nhentai.search(searchQuery, sort="popular").total_pages
-            searchPage = self.__nhentai.search(searchQuery, sort="popular", page=random.randint(1, pages))
+            searchPage = self.__nhentai.search(searchQuery, sort="popular", page=1 if pages == 0 else random.randint(1, pages))
         except:
             return -1
 
         doujinThumbnail = random.choice(searchPage.doujins)
 
-        return doujinThumbnail.cover, self.__nhentai.get_doujin(id=doujinThumbnail.id)
+        try:
+            return doujinThumbnail.cover, self.__nhentai.get_doujin(id=doujinThumbnail.id)
+        except:
+            return -1

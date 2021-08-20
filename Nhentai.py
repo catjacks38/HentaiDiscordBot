@@ -11,7 +11,7 @@ class NhentaiScrapper:
     # All blacklisted tags to comply with discord community guideline
     # Plus these tags are just kinda cringe anyway
     # MonkaTOS
-    bannedTags = ["lolicon", "shotacon", "rape"]
+    bannedTags = ['drugs', 'cheating', 'pregnant', 'netorare', 'mind control', 'lolicon', 'shotacon', 'incest', 'gore', 'vore', 'Scat', 'Rape']
 
     def __init__(self):
         self.__userVars = GlobalUserVariables()

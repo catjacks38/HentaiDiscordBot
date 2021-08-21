@@ -37,7 +37,7 @@ else:
         exit(-1)
 
 imageScrapperReddit = Reddit.ImageScrapper(options[1], options[2])
-nhentaiScrapper = Nhentai.NhentaiScrapper()
+nhentaiGrabber = Nhentai.NHentaiGrabber()
 
 
 # Prints a ready message once the bot is ready
@@ -183,27 +183,29 @@ async def nhentai(ctx, *, args):
     # ".nhentai random"
     if parsedArgs[0] == "random":
         # Gets the language of the user, and gets a random doujin of that language
-        _, _, lang = nhentaiScrapper.get(ctx.author)
-        returnValue = nhentaiScrapper.query("", None, None, lang)
+        _, _, lang = nhentaiGrabber.get(ctx.author)
+        returnValue = nhentaiGrabber.query("", None, None, lang)
 
         # If the query failed, send an error message
         # Else, send the doujin
         if returnValue == -1:
-            await ctx.send(embed=Utils.errorEmbed("There was an error while querying Nhentai!"))
+            await ctx.send(embed=Utils.errorEmbed("There was an error while querying NHentai!"))
         else:
             cover, doujin = returnValue
             await ctx.send(embed=Utils.doujinEmbed(cover, doujin))
 
     # ".nhentai query <search query>"
     elif parsedArgs[0] == "query":
-        # Gets the required, banned, and language tags of the user, and queries Nhentai with those tags and search query (if specified)
-        required, banned, lang = nhentaiScrapper.get(ctx.author)
-        returnValue = nhentaiScrapper.query(args[len("query "):], required, banned, lang)
+        # Gets the required, banned, and language tags of the user, and queries NHentai with those tags and search query (if specified)
+        required, banned, lang = nhentaiGrabber.get(ctx.author)
+        returnValue = nhentaiGrabber.query(args[len("query "):], required, banned, lang)
 
         # If the query failed, send an error message
         # Else, send the doujin
         if returnValue == -1:
-            await ctx.send(embed=Utils.errorEmbed("There was an error while querying Nhentai!"))
+            await ctx.send(embed=Utils.errorEmbed("There was an error while querying NHentai!"))
+        elif returnValue == -2:
+            await ctx.send(embed=Utils.errorEmbed("No results found!"))
         else:
             cover, doujin = returnValue
             await ctx.send(embed=Utils.doujinEmbed(cover, doujin))
@@ -212,12 +214,17 @@ async def nhentai(ctx, *, args):
     elif parsedArgs[0] == "set":
         # Parses the parameters, and sets the user's saved tags to them
         required, banned, lang = Utils.nhentaiParseKeys(args)
-        nhentaiScrapper.set(ctx.author, required, banned, lang)
+        returnValue = nhentaiGrabber.set(ctx.author, required, banned, lang)
+
+        if returnValue == -1:
+            await ctx.send(embed=Utils.errorEmbed("One or more of the required tags selected are banned!"))
+        else:
+            await ctx.send(embed=discord.Embed(title="Your tags have been set.", color=Utils.EmbedColor))
 
     # ".nhentai list"
     elif parsedArgs[0] == "list":
         # Gets all of the saved tags of the user
-        required, banned, lang = nhentaiScrapper.get(ctx.author)
+        required, banned, lang = nhentaiGrabber.get(ctx.author)
 
         # Creates an embed to display the tags
         # If the tag is None, the string "None" will be sent, instead of an exception being thrown
@@ -233,43 +240,69 @@ async def nhentai(ctx, *, args):
     # ".nhentai clear"
     elif parsedArgs[0] == "clear":
         # Clears all of the user's saved tags
-        nhentaiScrapper.clear(ctx.author)
+        nhentaiGrabber.clear(ctx.author)
+
+        await ctx.send(embed=discord.Embed(title="Your saved tags have been cleared.", color=Utils.EmbedColor))
 
 
-# ".help" command
+# ".help <base command (optional)>" command
 @bot.command(aliases=["usage"])
-async def help(ctx):
+async def help(ctx, *, args=""):
     # Creates fancy help screen embed, so it looks like I know what im doing
 
-    embed = discord.Embed(
-        title="Help and Usage",
-        color=Utils.EmbedColor
-    )
+    embed = discord.Embed(title="Help and Usage", color=Utils.EmbedColor)
 
-    embed.add_field(name=".help/.usage", value="Shows this help screen.", inline=False)
-    embed.add_field(
-        name=".reddit <top or hot> <subreddit or subreddit index>",
-        value="Picks a random image from the top or hot section on the chosen subreddit or subreddit index."
-              "\nDefaults to r/hentai if the subreddit or subreddit index is not valid or no argument is supplied."
-              "\nExamples:"
-              "\n`.reddit top hentai`"
-              "\n`.reddit top 0`",
-        inline=False
-    )
-    embed.add_field(
-        name=".reddit refresh <subreddit or subreddit index>",
-        value="Refreshes the cache of the chosen subreddit or subreddit index."
-              "\nDefaults to r/hentai if the subreddit or subreddit index is not valid or no argument is supplied."
-              "\nExamples:"
-              "\n`.reddit refresh hentai`"
-              "\n`.reddit refresh 0`",
-        inline=False
-    )
-    embed.add_field(
-        name=".reddit subreddits",
-        value="Lists all of the supported subreddits.",
-        inline=False
-    )
+    if args == "reddit":
+        embed.add_field(
+            name=".reddit <top or hot> <subreddit or subreddit index (default: hentai)>",
+            value="Picks a random image from the top or hot section on the chosen subreddit or subreddit index."
+                  "\nDefaults to r/hentai if the subreddit or subreddit index is not valid or no argument is supplied."
+                  "\nExamples:"
+                  "\n`.reddit top hentai`"
+                  "\n`.reddit top 0`",
+            inline=False
+        )
+        embed.add_field(
+            name=".reddit refresh <subreddit or subreddit index (default: hentai)>",
+            value="Refreshes the cache of the chosen subreddit or subreddit index."
+                  "\nDefaults to r/hentai if the subreddit or subreddit index is not valid or no argument is supplied."
+                  "\nExamples:"
+                  "\n`.reddit refresh hentai`"
+                  "\n`.reddit refresh 0`",
+            inline=False
+        )
+        embed.add_field(
+            name=".reddit subreddits",
+            value="Lists all of the supported subreddits.",
+            inline=False
+        )
+
+    elif args == "nhentai":
+        embed.add_field(
+            name=".nhentai random",
+            value="Picks a random doujin of the user's selected language. "
+                  "This excludes or requires no tags except for the banned tags."
+                  "\nExample:"
+                  "\n`.nhentai random`",
+            inline=False
+        )
+        embed.add_field(
+            name=".nhentai query <search query (optional)>",
+            value="Queries NHentai of search query plus the user's saved tags"
+                  "\nExample:"
+                  "\n`.nhentai query my friend came back from the future to fuck me`",
+            inline=False
+        )
+
+    else:
+        embed.add_field(
+            name=".help/.usage <base command>",
+            value="Shows help screen of base command. If there is no base command, this help screen will be show by default."
+                  "\nExample:"
+                  "\n`.help reddit`",
+            inline=False
+        )
+
     embed.add_field(
         name="Project Homepage:",
         value="[https://github.com/catjacks38/HentaiDiscordBot](url)",

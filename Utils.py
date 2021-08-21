@@ -33,13 +33,13 @@ def nhentaiParseKeys(args):
         # Attempts to find all of the keywords in args
         requiredIDX = args.find("required=")
         bannedIDX = args.find("banned=")
-        langIDX = args.find("lang=")
+        langIDX = args.find("language=")
 
         # If that keyword index is equal to -1, than set the tag to None
         # Else, Find the closest next keyword, and stored the index of it in stopIDX
         # If the there is no next keyword, stopIDX is set to the length of args
         # Get the string indice of the end of the keyword to stopIDX
-        # Split the string into a list if the tag is required or banned. This doesn't happen for the lang keyword
+        # Split the string into a list if the tag is required or banned. This doesn't happen for the language keyword
         if requiredIDX == -1:
                 requiredTags = None
         else:
@@ -83,10 +83,24 @@ def nhentaiParseKeys(args):
 
                 stopIDX = len(args) if len(IDXList) == 0 else min(IDXList) - 1
 
-                lang = args[langIDX + len("lang="):stopIDX]
+                lang = args[langIDX + len("language="):stopIDX]
 
-        # If the required or banned tag is nothing, return None for the corresponding tag
-        return None if requiredTags == [""] else requiredTags, None if bannedTags == [""] else bannedTags, lang
+        # If the tag(s) is empty, set the tag(s) to None
+        requiredTags = None if requiredTags == [""] else requiredTags
+        bannedTags = None if bannedTags == [""] else bannedTags
+
+        # If the tags above are not equal to None
+        # If the tag is set to ["None"] or ["none"], set the tag to -1
+        if requiredTags:
+                requiredTags = -1 if requiredTags == ["None"] or requiredTags == ["none"] else requiredTags
+
+        if bannedTags:
+                bannedTags = -1 if bannedTags == ["None"] or bannedTags == ["none"] else bannedTags
+
+        # If lang is set to "None" or "none", set it to None
+        lang = -1 if lang == "None" or lang == "none" else lang
+
+        return requiredTags, bannedTags, lang
 
 
 # A function for making the doujin embeds

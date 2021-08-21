@@ -3,7 +3,7 @@ from NHentai.nhentai import NHentai
 from discord_variables_plugin import GlobalUserVariables
 
 
-class NhentaiScrapper:
+class NHentaiGrabber:
     __nhentai = NHentai()
 
     userVarsFp = "users.var"
@@ -29,6 +29,13 @@ class NhentaiScrapper:
             self.__userVars.set(user, "banned", banned)
 
         if required:
+            # Checks to make sure required is not -1 before iterating
+            if required != -1:
+                # If the required tag is in bannedTags, return -1
+                for tag in required:
+                    if tag in self.bannedTags:
+                        return -1
+
             self.__userVars.set(user, "required", required)
 
         if lang:
@@ -82,6 +89,9 @@ class NhentaiScrapper:
             searchPage = self.__nhentai.search(searchQuery, sort="popular", page=1 if pages == 0 else random.randint(1, pages))
         except:
             return -1
+
+        if len(searchPage.doujins) == 0:
+            return -2
 
         # A random doujin is chosen
         doujinThumbnail = random.choice(searchPage.doujins)

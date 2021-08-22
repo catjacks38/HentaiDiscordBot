@@ -18,9 +18,9 @@ class NHentaiGrabber:
 
         # Attempts to load self.userVarsFp
         # If that fails, an empty save will be created
-        returnValue = self.__userVars.load(self.userVarsFp)
-
-        if returnValue == -1:
+        try:
+            self.__userVars.load(self.userVarsFp)
+        except:
             self.__userVars.save(self.userVarsFp)
 
     def set(self, user, required, banned, lang):
@@ -29,17 +29,15 @@ class NHentaiGrabber:
             self.__userVars.set(user, "banned", banned)
 
         if required:
-            # Checks to make sure required is not -1 before iterating
-            if required != -1:
-                # If the required tag is in bannedTags, return -1
-                for tag in required:
-                    if tag in self.bannedTags:
-                        return -1
+            # If the required tag is in bannedTags, return -1
+            for tag in required:
+                if tag in self.bannedTags:
+                    return -1
 
             self.__userVars.set(user, "required", required)
 
         if lang:
-            self.__userVars.set(user, "lang", lang)
+            self.__userVars.set(user, "language", lang)
 
         # Saves the changes
         self.__userVars.save(self.userVarsFp)
@@ -48,18 +46,38 @@ class NHentaiGrabber:
         # Loads self.userVarsFp
         self.__userVars.load(self.userVarsFp)
 
-        # Gets every saved tag of user
-        banned = self.__userVars.get(user, "banned")
-        required = self.__userVars.get(user, "required")
-        lang = self.__userVars.get(user, "lang")
+        # Tries to get the saved tag(s) of user
+        # Sets the tag to None if it isn't saved
+        try:
+            required = self.__userVars.get(user, "required")
+        except:
+            required = None
+
+        try:
+            banned = self.__userVars.get(user, "banned")
+        except:
+            banned = None
+
+        try:
+            lang = self.__userVars.get(user, "language")
+        except:
+            lang = None
 
         # If there is no tag saved, return None for that tag
-        return required if required != -1 else None, banned if banned != -1 else None, lang if lang != -1 else None
+        return required, banned, lang
 
-    def clear(self, user):
-        # Clears the user's tags, and saves the changes
-        self.__userVars.clearUser(user)
-        self.__userVars.save(self.userVarsFp)
+    def clear(self, user, var=None):
+        try:
+            # If var is set, remove var of user
+            # Else, clear user
+            if var:
+                self.__userVars.removeVar(user, var)
+            else:
+                self.__userVars.clearUser(user)
+
+            self.__userVars.save(self.userVarsFp)
+        except:
+            return -1
 
     def query(self, query, required, banned, lang):
         searchQuery = ""

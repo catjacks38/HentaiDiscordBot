@@ -60,7 +60,6 @@ async def reddit(ctx, *, args):
         # If it is nether, it will be defaulted to r/hentai
         try:
             parsedArgs[1]
-
             try:
                 submissions = imageScrapperReddit.Get(ctx.guild, imageScrapperReddit.subreddits[int(parsedArgs[1])], "top")
             except:
@@ -175,7 +174,7 @@ async def reddit(ctx, *, args):
         await ctx.send(embed=Utils.errorEmbed(f"\"{parsedArgs[0]}\" is not a valid argument for `.reddit`!"))
 
 
-# ".nhentai" command
+# .nhentai command
 @bot.command()
 async def nhentai(ctx, *, args):
     parsedArgs = args.split(" ")
@@ -194,7 +193,7 @@ async def nhentai(ctx, *, args):
             cover, doujin = returnValue
             await ctx.send(embed=Utils.doujinEmbed(cover, doujin))
 
-    # ".nhentai query <search query>"
+    # .nhentai query <search query>
     elif parsedArgs[0] == "query":
         # Gets the required, banned, and language tags of the user, and queries NHentai with those tags and search query (if specified)
         required, banned, lang = nhentaiGrabber.get(ctx.author)
@@ -210,7 +209,7 @@ async def nhentai(ctx, *, args):
             cover, doujin = returnValue
             await ctx.send(embed=Utils.doujinEmbed(cover, doujin))
 
-    # ".nhentai set <parameters>"
+    # .nhentai set <parameters>
     elif parsedArgs[0] == "set":
         # Parses the parameters, and sets the user's saved tags to them
         required, banned, lang = Utils.nhentaiParseKeys(args)
@@ -219,9 +218,40 @@ async def nhentai(ctx, *, args):
         if returnValue == -1:
             await ctx.send(embed=Utils.errorEmbed("One or more of the required tags selected are banned!"))
         else:
-            await ctx.send(embed=discord.Embed(title="Your tags have been set.", color=Utils.EmbedColor))
+            await ctx.send(embed=discord.Embed(title="Your saved tags have been set.", color=Utils.EmbedColor))
 
-    # ".nhentai list"
+    # .nhentai append <parameters>
+    elif parsedArgs[0] == "append":
+        # Parses the parameters
+        newRequired, newBanned, _ = Utils.nhentaiParseKeys(args)
+
+        # Gets the saved tags
+        required, banned, _ = nhentaiGrabber.get(ctx.author)
+
+        # If the required keyword is supplied
+        if newRequired:
+            # If required is saved, append newRequired to it
+            # Else, set required to newRequired
+            if required:
+                required += newRequired
+            else:
+                required = newRequired
+
+        # If the banned keyword is supplied
+        if newBanned:
+            # If banned is saved, append newBanned to it
+            # Else, set banned to newBanned
+            if banned:
+                banned += newBanned
+            else:
+                banned = newBanned
+
+        # Saves the newly appended tags
+        nhentaiGrabber.set(ctx.author, required, banned, None)
+
+        await ctx.send(embed=discord.Embed(title="Appended to your saved tags.", color=Utils.EmbedColor))
+
+    # .nhentai list
     elif parsedArgs[0] == "list":
         # Gets all of the saved tags of the user
         required, banned, lang = nhentaiGrabber.get(ctx.author)
@@ -234,18 +264,29 @@ async def nhentai(ctx, *, args):
         embed.add_field(name="Banned: ", value="None" if not banned else "".join(map(lambda x: str(x) + ", ", banned))[:-2], inline=False)
         embed.add_field(name="Language: ", value="None" if not lang else lang, inline=False)
 
-        # Sends the embed
         await ctx.send(embed=embed)
 
-    # ".nhentai clear"
+    # .nhentai clear
     elif parsedArgs[0] == "clear":
-        # Clears all of the user's saved tags
-        nhentaiGrabber.clear(ctx.author)
+        try:
+            # If parsedArgs[1] is supplied, and it is equal to either required, banned, or language
+            # Then clear the user's saved tag(s) of parsedArgs[1]
+            if parsedArgs[1] in ["required", "banned", "language"]:
+                nhentaiGrabber.clear(ctx.author, parsedArgs[1])
 
-        await ctx.send(embed=discord.Embed(title="Your saved tags have been cleared.", color=Utils.EmbedColor))
+                await ctx.send(embed=discord.Embed(title=f"The saved tag(s) of {parsedArgs[1]} have been cleared.", color=Utils.EmbedColor))
+
+            # If parsedArgs[1] is supplied, but it isn't a valid saved user tag
+            # Send an error message
+            else:
+                await ctx.send(embed=Utils.errorEmbed(f"\"{parsedArgs[1]}\" is not a valid saved tag. It must be, required, banned, or language."))
+        except:
+            # If parsedArgs[1] was never supplied
+            nhentaiGrabber.clear(ctx.author)
+            await ctx.send(embed=discord.Embed(title="All of your saved tag(s) have been cleared."))
 
 
-# ".help <base command (optional)>" command
+# .help <base command (optional)> command
 @bot.command(aliases=["usage"])
 async def help(ctx, *, args=""):
     # Creates fancy help screen embed, so it looks like I know what im doing
@@ -273,7 +314,7 @@ async def help(ctx, *, args=""):
         )
         embed.add_field(
             name=".reddit subreddits",
-            value="Lists all of the supported subreddits.",
+            value="Lists all the supported subreddits.",
             inline=False
         )
 
@@ -281,9 +322,33 @@ async def help(ctx, *, args=""):
         embed.add_field(
             name=".nhentai random",
             value="Picks a random doujin of the user's selected language. "
-                  "This excludes or requires no tags except for the banned tags."
+                  "This command doesn't ban or require any tags saved by you."
                   "\nExample:"
                   "\n`.nhentai random`",
+            inline=False
+        )
+        embed.add_field(
+            name=".nhentai set <parameters>",
+            value="Sets your saved tags used for querying. The supported keywords are required, banned, and language."
+                  "\n Note: You don't need to supply every keyword, and each tag is seperated by \", \"."
+                  "\n Another note: The language keyword only takes in one language, so don't do `language=english, japanese`."
+                  "\nExamples:"
+                  "\n`.nhentai set required=paizuri, story arc banned=netorare, harem language=english`"
+                  "\n (required, banned, and language will be set)"
+                  "\n`.nhentai set required=paizuri`"
+                  "\n (Only required gets set. The rest of the saved tags don't change.)",
+            inline=False
+        )
+        embed.add_field(
+            name=".nhentai append <parameters>",
+            value="Appends the tags in parameters to your saved tags. "
+                  "This command is used in the same way that `.nhentai set` is used."
+                  "\nNote: Only the required and banned keywords work for this."
+                  "\nExamples:"
+                  "\n`.nhentai append required=paizuri, story arc banned=netorare, harem`"
+                  "\n(Appends [paizuri, story arc] to your saved required tags and [netorare, harem] to your saved banned tags)"
+                  "\n`.nhentai append required=paizuri, story arc`"
+                  "\n(Appends [paizuri, story arc] to your saved tags)",
             inline=False
         )
         embed.add_field(
@@ -293,11 +358,28 @@ async def help(ctx, *, args=""):
                   "\n`.nhentai query my friend came back from the future to fuck me`",
             inline=False
         )
+        embed.add_field(
+            name=".nhentai list",
+            value="List all of your saved tags.",
+            inline=False
+        )
+        embed.add_field(
+            name=".nhentai clear <saved tag (optional)>",
+            value="Clears all of your saved tags, unless if a saved tag is supplied (can only be required, banned, or language)."
+                  "\nExamples:"
+                  "\n`.nhentai clear required`"
+                  "\n(Your saved required tags are cleared)"
+                  "\n`.nhentai clear`"
+                  "\n(All of your saved tags are cleared)",
+            inline=False
+        )
 
     else:
         embed.add_field(
-            name=".help/.usage <base command>",
-            value="Shows help screen of base command. If there is no base command, this help screen will be show by default."
+            name=".help/.usage <base command (optional)>",
+            value="Shows help screen of base command. "
+                  "If there is no base command or the base command is not valid, this help screen will be show by default."
+                  "\nThe base commands are nhentai and reddit."
                   "\nExample:"
                   "\n`.help reddit`",
             inline=False

@@ -89,17 +89,6 @@ def nhentaiParseKeys(args):
         requiredTags = None if requiredTags == [""] else requiredTags
         bannedTags = None if bannedTags == [""] else bannedTags
 
-        # If the tags above are not equal to None
-        # If the tag is set to ["None"] or ["none"], set the tag to -1
-        if requiredTags:
-                requiredTags = -1 if requiredTags == ["None"] or requiredTags == ["none"] else requiredTags
-
-        if bannedTags:
-                bannedTags = -1 if bannedTags == ["None"] or bannedTags == ["none"] else bannedTags
-
-        # If lang is set to "None" or "none", set it to None
-        lang = -1 if lang == "None" or lang == "none" else lang
-
         return requiredTags, bannedTags, lang
 
 

@@ -11,6 +11,7 @@ Hopefully I don't regret giving this link out, but here it is: [Invite Link](htt
 - discord.py
 - praw
 - discord_variables_plugin
+- Nhentai-API
 
 ## Install Script Requirements
 - Windows: `pip install -r requirements.txt`
@@ -25,20 +26,74 @@ To start the bot again, type in
 - Windows: `python bot.py`
 - Linux: `python3 bot.py`
 
-## Bot Usage
-### `.help` or `.usage`
-- Shows help/usage screen
+## `.help` Usage
 
-### `.reddit <top or hot> <subreddit or index>`
+### `.help/.usage <base command (optional)>`
+- Shows help screen of base command. 
+- If there is no base command or the base command is not valid, this help screen will be show by default.
+- The base commands are nhentai and reddit.
+### Example:
+- `.help reddit`
+
+## `.reddit` Usage
+
+### `.reddit <top or hot> <subreddit or subreddit index (default: hentai)>`
 - Picks a random image from the top or hot section on the chosen subreddit or subreddit index.
 - Defaults to r/hentai if the subreddit or subreddit index is not valid or no argument is supplied.
 ### Examples:
 - `.reddit top hentai`
 - `.reddit top 0`
 
-### `.reddit refresh <subreddit or index>`
+### `.reddit refresh <subreddit or subreddit index (default: hentai)>`
 - Refreshes the cache of the chosen subreddit or subreddit index.
 - Defaults to r/hentai if the subreddit or subreddit index is not valid or no argument is supplied.
 ### Examples:
 - `.reddit refresh hentai`
 - `.reddit refresh 0`
+### `.reddit subreddits`
+- List all the supported subreddits.
+
+## `.nhentai` Usage
+
+### `.nhentai random`
+- Picks a random doujin of the user's selected language.
+- This command doesn't ban or require any tags saved by you.
+### Example:
+- `.nhentai random`
+
+### `.nhentai set <parameters>`
+- Sets your saved tags used for querying. 
+- The supported keywords are required, banned, and language.
+- Note: You don't need to supply every keyword, and each tag is seperated by ", ".
+- Another note: The language keyword only takes in one language, so don't do `language=english, japanese`
+### Examples:
+- `.nhentai set required=paizuri, story arc banned=netorare, harem language=english`
+  - (required, banned, and language will be set)
+- `.nhentai set required=paizuri` 
+  - (Only required gets set. The rest of the saved tags don't change.)
+
+### `.nhentai append <parameters>`
+- Appends the tags in parameters to your saved tags.
+- This command is used in the same way that `.nhentai set` is used.
+- Note: Only the required and banned keywords work for this.
+### Examples:
+- `.nhentai append required=paizuri, story arc banned=netorare, harem` 
+  - (Appends [paizuri, story arc] to your saved required tags and [netorare, harem] to your saved banned tags)
+- `.nhentai append required=paizuri, story arc` 
+  - (Appends [paizuri, story arc] to your saved tags)
+
+### `.nhentai query <search query (optional)>`
+- Queries NHentai of search query plus the user's saved tags
+### Example:
+- `.nhentai query my friend came back from the future to fuck me`
+
+### `.nhentai list`
+- List all of your saved tags.
+
+### `.nhentai clear <saved tag (optional)>`
+- Clears all of your saved tags, unless if a saved tag is supplied (can only be required, banned, or language).
+### Examples:
+- `.nhentai clear required`
+  - (Your saved required tags are cleared)
+- `.nhentai clear`
+  - (All of your saved tags are cleared)

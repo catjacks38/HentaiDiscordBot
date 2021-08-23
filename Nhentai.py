@@ -103,8 +103,8 @@ class NHentaiGrabber:
         # Attempts to query Nhentai, and pick a random doujin
         # Returns -1, if it fails
         try:
-            pages = self.__nhentai.search(searchQuery, sort="popular").total_pages
-            searchPage = self.__nhentai.search(searchQuery, sort="popular", page=1 if pages == 0 else random.randint(1, pages))
+            pages = self.__nhentai.search(searchQuery).total_pages
+            searchPage = self.__nhentai.search(searchQuery, page=1 if pages == 0 else random.randint(1, pages))
         except:
             return -1
 

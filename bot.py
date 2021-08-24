@@ -40,6 +40,42 @@ imageScrapperReddit = Reddit.ImageScrapper(options[1], options[2])
 nhentaiGrabber = Nhentai.NHentaiGrabber()
 
 
+# Function to help with getting submissions
+def getSubmissions(server, parsedArgs, section):
+    # Checks if the seconds argument is a string name of the subreddit or an index of the subreddit
+    # If it is neither, it will be defaulted to r/hentai
+    try:
+        parsedArgs[1]
+        try:
+            submissions = imageScrapperReddit.Get(server, imageScrapperReddit.subreddits[int(parsedArgs[1])], section)
+        except:
+            submissions = imageScrapperReddit.Get(server, parsedArgs[1], section)
+    except:
+        parsedArgs.append("hentai")
+        submissions = imageScrapperReddit.Get(server, parsedArgs[1], section)
+
+    # Checks to make sure the Get function returns a list
+    # Prints error message if it doesn't
+    if isinstance(submissions, int):
+        print(f"Error! Function returned {submissions}")
+        return submissions
+
+    else:
+        # If submissions length is more than zero, a random submission will be chosen and removed from the submissions
+        # Else, The cache will be refreshed, then a random submission will be chosen and removed from the submissions
+        if len(submissions) > 0:
+            choice = random.choice(submissions)
+            imageScrapperReddit.Remove(server, parsedArgs[1], section, choice)
+        else:
+            imageScrapperReddit.RefreshCache(server, parsedArgs[1], section)
+            submissions = imageScrapperReddit.Get(server, parsedArgs[1], section)
+
+            choice = random.choice(submissions)
+            imageScrapperReddit.Remove(server, parsedArgs[1], section, choice)
+
+        return choice
+
+
 # Prints a ready message once the bot is ready
 @bot.event
 async def on_ready():
@@ -56,69 +92,27 @@ async def reddit(ctx, *, args):
 
     # .reddit top <subreddit or subreddit index>
     if parsedArgs[0] == "top":
-        # Checks if the seconds argument is a string name of the subreddit or an index of the subreddit
-        # If it is nether, it will be defaulted to r/hentai
-        try:
-            parsedArgs[1]
+        # If there is an error trying to display the Reddit embed, remove the submission, and repeat until there is no error
+        while 1:
+            choice = getSubmissions(ctx.guild, parsedArgs, "top")
+
             try:
-                submissions = imageScrapperReddit.Get(ctx.guild, imageScrapperReddit.subreddits[int(parsedArgs[1])], "top")
+                await ctx.send(embed=Utils.redditEmbed(choice))
+                break
             except:
-                submissions = imageScrapperReddit.Get(ctx.guild, parsedArgs[1], "top")
-        except:
-            parsedArgs.append("hentai")
-            submissions = imageScrapperReddit.Get(ctx.guild, parsedArgs[1], "top")
-
-        # Checks to make sure the Get function returns a list
-        # Prints error message if it doesn't
-        if isinstance(submissions, int):
-            print(f"Error! Function returned {submissions}")
-        else:
-            # If submissions length is more than zero, a random submission will be chosen and removed from the submissions
-            # Else, The cache will be refreshed, then a random submission will be chosen and removed from the submissions
-            if len(submissions) > 0:
-                choice = random.choice(submissions)
-                imageScrapperReddit.Remove(ctx.guild, parsedArgs[1], "top", choice)
-            else:
-                imageScrapperReddit.RefreshCache(ctx.guild, parsedArgs[1], "top")
-                submissions = imageScrapperReddit.Get(ctx.guild, parsedArgs[1], "top")
-
-                choice = random.choice(submissions)
-                imageScrapperReddit.Remove(ctx.guild, parsedArgs[1], "top", choice)
-
-            await ctx.send(embed=Utils.redditEmbed(choice))
+                pass
 
     # .reddit hot <subreddit or subreddit index>
     elif parsedArgs[0] == "hot":
-        # Checks if the seconds argument is a string name of the subreddit or an index of the subreddit
-        # If it is nether, it will be defaulted to r/hentai
-        try:
-            parsedArgs[1]
+        # If there is an error trying to display the Reddit embed, remove the submission, and repeat until there is no error
+        while 1:
+            choice = getSubmissions(ctx.guild, parsedArgs, "hot")
+
             try:
-                submissions = imageScrapperReddit.Get(ctx.guild, imageScrapperReddit.subreddits[int(parsedArgs[1])], "hot")
+                await ctx.send(embed=Utils.redditEmbed(choice))
+                break
             except:
-                submissions = imageScrapperReddit.Get(ctx.guild, parsedArgs[1], "hot")
-        except:
-            parsedArgs.append("hentai")
-            submissions = imageScrapperReddit.Get(ctx.guild, parsedArgs[1], "hot")
-
-        # Checks to make sure the Get function returns a list
-        # Prints error message if it doesn't
-        if isinstance(submissions, int):
-            print(f"Error! Function returned {submissions}")
-        else:
-            # If submissions length is more than zero, a random submission will be chosen and removed from the submissions
-            # Else, The cache will be refreshed, then a random submission will be chosen and removed from the submissions
-            if len(submissions) > 0:
-                choice = random.choice(submissions)
-                imageScrapperReddit.Remove(ctx.guild, parsedArgs[1], "hot", choice)
-            else:
-                imageScrapperReddit.RefreshCache(ctx.guild, parsedArgs[1], "hot")
-                submissions = imageScrapperReddit.Get(ctx.guild, parsedArgs[1], "hot")
-
-                choice = random.choice(submissions)
-                imageScrapperReddit.Remove(ctx.guild, parsedArgs[1], "hot", choice)
-
-            await ctx.send(embed=Utils.redditEmbed(choice))
+                pass
 
     # .reddit refresh <subreddit name or subreddit index>
     elif parsedArgs[0] == "refresh":

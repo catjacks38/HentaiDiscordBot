@@ -18,10 +18,11 @@ class ImageScrapper:
         self.__bot = praw.Reddit(user_agent="Image Scrapper Thing (by u/catjacks38)", client_id=clientID, client_secret=clientSecret)
         self.__serverVars = ServerVariables()
 
-        # Tries to read the cache files--sets them to False if they do not exist or can't be read
-        returnValue = self.__serverVars.load(self.serverVarsFp)
-
-        if returnValue == -1:
+        # Tries to read the cache files
+        # Creates new cache file, if it doesn't exist
+        try:
+            self.__serverVars.load(self.serverVarsFp)
+        except:
             self.__serverVars.save(self.serverVarsFp)
 
     def RefreshCache(self, server, subreddit, section):
@@ -55,12 +56,13 @@ class ImageScrapper:
             if url[:18] == "https://i.redd.it/" or url[:20] == "https://i.imgur.com/":
                 submissions.append(post)
 
-        newCache = self.__serverVars.get(server, sr)
-
-        if newCache == -1:
-            newCache = {section : submissions}
-        else:
+        # Tries to insert data into a new key or existing key of newCache
+        # Creates a new dictionary if there are no caches of sr
+        try:
+            newCache = self.__serverVars.get(server, sr)
             newCache[section] = submissions
+        except:
+            newCache = {section : submissions}
 
         # Saves the posts to serverVars
         self.__serverVars.set(server, sr, newCache)
@@ -78,14 +80,13 @@ class ImageScrapper:
 
         # If section is not a valid section, the function returns -2
         if section == "top":
-            submissions = self.__serverVars.get(server, sr)
 
             # Refreshes cache if there is no cache
-            if submissions != -1:
-                try:
-                    return submissions["top"]
-                except:
-                    pass
+            try:
+                submissions = self.__serverVars.get(server, sr)
+                return submissions["top"]
+            except:
+                pass
 
             returnValue = self.RefreshCache(server, sr, "top")
 
@@ -97,14 +98,13 @@ class ImageScrapper:
                 return returnValue
 
         elif section == "hot":
-            submissions = self.__serverVars.get(server, sr)
 
             # Refreshes cache if there is no cache
-            if submissions != -1:
-                try:
-                    return submissions["hot"]
-                except:
-                    pass
+            try:
+                submissions = self.__serverVars.get(server, sr)
+                return submissions["top"]
+            except:
+                pass
 
             returnValue = self.RefreshCache(server, sr, "hot")
 
@@ -138,6 +138,7 @@ class ImageScrapper:
                 self.__serverVars.save(self.serverVarsFp)
             except:
                 return -1
+
         elif section == "hot":
             # Removes hot submission from sr
             # If it fails, -1 is returned

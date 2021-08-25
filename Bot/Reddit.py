@@ -14,7 +14,7 @@ class ImageScrapper:
     subreddits = ["hentai", "ecchi"]
 
     def __init__(self, clientID, clientSecret):
-        # Creates bot
+        # Creates Bot
         self.__bot = praw.Reddit(user_agent="Image Scrapper Thing (by u/catjacks38)", client_id=clientID, client_secret=clientSecret)
         self.__serverVars = ServerVariables()
 

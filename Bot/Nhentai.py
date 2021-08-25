@@ -6,6 +6,7 @@ from discord_variables_plugin import GlobalUserVariables
 class NHentaiGrabber:
     __nhentai = NHentai()
 
+    __userVars = GlobalUserVariables()
     userVarsFp = "users.var"
 
     # All blacklisted tags to comply with discord community guideline
@@ -14,8 +15,6 @@ class NHentaiGrabber:
     bannedTags = ["lolicon", "shotacon", "rape"]
 
     def __init__(self):
-        self.__userVars = GlobalUserVariables()
-
         # Attempts to load self.userVarsFp
         # If that fails, an empty save will be created
         try:
@@ -69,11 +68,24 @@ class NHentaiGrabber:
     def clear(self, user, var=None):
         try:
             # If var is set, remove var of user
-            # Else, clear user
+            # Else, clears the user
             if var:
                 self.__userVars.removeVar(user, var)
             else:
-                self.__userVars.clearUser(user)
+                try:
+                    self.__userVars.removeVar(user, "required")
+                except:
+                    pass
+
+                try:
+                    self.__userVars.removeVar(user, "banned")
+                except:
+                    pass
+
+                try:
+                    self.__userVars.removeVar(user, "language")
+                except:
+                    pass
 
             self.__userVars.save(self.userVarsFp)
         except:

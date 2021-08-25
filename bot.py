@@ -1,7 +1,7 @@
-import Utils
+from Bot import Utils
+from Bot.Nhentai import NHentaiGrabber
+from Bot.Reddit import ImageScrapper
 import random
-import Reddit
-import Nhentai
 import pickle
 import argparse
 import discord
@@ -36,8 +36,8 @@ else:
         print("\"options.cfg\" was not found.")
         exit(-1)
 
-imageScrapperReddit = Reddit.ImageScrapper(options[1], options[2])
-nhentaiGrabber = Nhentai.NHentaiGrabber()
+imageScrapperReddit = ImageScrapper(options[1], options[2])
+nhentaiGrabber = NHentaiGrabber()
 
 
 # Function to help with getting submissions

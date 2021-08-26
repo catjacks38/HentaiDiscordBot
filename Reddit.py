@@ -102,7 +102,7 @@ class ImageScrapper:
             # Refreshes cache if there is no cache
             try:
                 submissions = self.__serverVars.get(server, sr)
-                return submissions["top"]
+                return submissions["hot"]
             except:
                 pass
 

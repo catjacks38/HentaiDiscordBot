@@ -65,13 +65,17 @@ def getSubmissions(server, parsedArgs, section):
         # Else, The cache will be refreshed, then a random submission will be chosen and removed from the submissions
         if len(submissions) > 0:
             choice = random.choice(submissions)
-            imageScrapperReddit.Remove(server, parsedArgs[1], section, choice)
+            
+            imageScrapperReddit.Remove(server, parsedArgs[1], "top", choice)
+            imageScrapperReddit.Remove(server, parsedArgs[1], "hot", choice)
         else:
             imageScrapperReddit.RefreshCache(server, parsedArgs[1], section)
             submissions = imageScrapperReddit.Get(server, parsedArgs[1], section)
 
             choice = random.choice(submissions)
-            imageScrapperReddit.Remove(server, parsedArgs[1], section, choice)
+            
+            imageScrapperReddit.Remove(server, parsedArgs[1], "top", choice)
+            imageScrapperReddit.Remove(server, parsedArgs[1], "hot", choice)
 
         return choice
 

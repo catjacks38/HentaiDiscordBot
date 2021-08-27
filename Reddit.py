@@ -14,7 +14,7 @@ class ImageScrapper:
     subreddits = ["hentai", "ecchi"]
 
     def __init__(self, clientID, clientSecret):
-        # Creates Bot
+        # Creates bot
         self.__bot = praw.Reddit(user_agent="Image Scrapper Thing (by u/catjacks38)", client_id=clientID, client_secret=clientSecret)
         self.__serverVars = ServerVariables()
 
@@ -102,7 +102,7 @@ class ImageScrapper:
             # Refreshes cache if there is no cache
             try:
                 submissions = self.__serverVars.get(server, sr)
-                return submissions["top"]
+                return submissions["hot"]
             except:
                 pass
 
@@ -152,3 +152,6 @@ class ImageScrapper:
                 return -1
         else:
             return -2
+
+    def getSubmission(self, link):
+        return self.__bot.submission(url=link)

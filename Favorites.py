@@ -1,6 +1,16 @@
 from discord_variables_plugin import GlobalUserVariables
 
 
+# Class for storing submission data
+class SubmissionData:
+    def __init__(self, imageUrl, shortlink, title, authorName, authorIconUrl):
+        self.imageUrl = imageUrl
+        self.shortlink = shortlink
+        self.title = title
+        self.authorName = authorName
+        self.authorIconUrl = authorIconUrl
+
+
 class Favorites:
     userVarsFp = "users.var"
     __userVars = GlobalUserVariables()
@@ -19,7 +29,7 @@ class Favorites:
         except:
             favorites = []
 
-        favorites.append(submission)
+        favorites.append(SubmissionData(submission.url, submission.shortlink, submission.title, submission.author.name, submission.author.icon_img))
 
         self.__userVars.set(user, "favorites", favorites)
         self.__userVars.save(self.userVarsFp)
@@ -28,13 +38,19 @@ class Favorites:
         self.__userVars.load(self.userVarsFp)
 
         try:
-            return self.__userVars.get(user, "favorites")
+            favorites = self.__userVars.get(user, "favorites")
+
+            if not favorites:
+                self.clear(user)
+                return -1
+
+            return favorites
         except:
             return -1
 
     def remove(self, user, index):
         try:
-            favorites = self.__userVars.get(user, "favorites")
+            favorites = self.get(user)
         except:
             return -1
 
@@ -49,5 +65,6 @@ class Favorites:
     def clear(self, user):
         try:
             self.__userVars.removeVar(user, "favorites")
+            self.__userVars.save(self.userVarsFp)
         except:
             return -1

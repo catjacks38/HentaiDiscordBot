@@ -1,6 +1,7 @@
-from Bot import Utils
-from Bot.Nhentai import NHentaiGrabber
-from Bot.Reddit import ImageScrapper
+from Favorites import Favorites
+import Utils
+from Nhentai import NHentaiGrabber
+from Reddit import ImageScrapper
 import random
 import pickle
 import argparse
@@ -38,6 +39,7 @@ else:
 
 imageScrapperReddit = ImageScrapper(options[1], options[2])
 nhentaiGrabber = NHentaiGrabber()
+favorites = Favorites()
 
 
 # Function to help with getting submissions
@@ -65,13 +67,17 @@ def getSubmissions(server, parsedArgs, section):
         # Else, The cache will be refreshed, then a random submission will be chosen and removed from the submissions
         if len(submissions) > 0:
             choice = random.choice(submissions)
-            imageScrapperReddit.Remove(server, parsedArgs[1], section, choice)
+
+            imageScrapperReddit.Remove(server, parsedArgs[1], "top", choice)
+            imageScrapperReddit.Remove(server, parsedArgs[1], "hot", choice)
         else:
             imageScrapperReddit.RefreshCache(server, parsedArgs[1], section)
             submissions = imageScrapperReddit.Get(server, parsedArgs[1], section)
 
             choice = random.choice(submissions)
-            imageScrapperReddit.Remove(server, parsedArgs[1], section, choice)
+
+            imageScrapperReddit.Remove(server, parsedArgs[1], "top", choice)
+            imageScrapperReddit.Remove(server, parsedArgs[1], "hot", choice)
 
         return choice
 
@@ -97,7 +103,7 @@ async def reddit(ctx, *, args):
             choice = getSubmissions(ctx.guild, parsedArgs, "top")
 
             try:
-                await ctx.send(embed=Utils.redditEmbed(choice))
+                await ctx.send(embed=Utils.submissionEmbed(choice))
                 break
             except:
                 pass
@@ -109,7 +115,7 @@ async def reddit(ctx, *, args):
             choice = getSubmissions(ctx.guild, parsedArgs, "hot")
 
             try:
-                await ctx.send(embed=Utils.redditEmbed(choice))
+                await ctx.send(embed=Utils.submissionEmbed(choice))
                 break
             except:
                 pass
@@ -163,6 +169,37 @@ async def reddit(ctx, *, args):
     # .reddit subreddits
     elif parsedArgs[0] == "subreddits":
         await ctx.send(embed=Utils.supportedSubredditsEmbed(imageScrapperReddit.subreddits))
+
+    elif parsedArgs[0] == "favorite":
+        try:
+            favorites.add(
+                ctx.author,
+                imageScrapperReddit.getSubmission((await ctx.fetch_message(ctx.message.reference.message_id)).embeds[0].fields[0].value[1:-6])
+            )
+            await ctx.send(embed=discord.Embed(title="Submission added to favorites.", color=Utils.EmbedColor))
+        except:
+            await ctx.send(embed=Utils.errorEmbed("There was an error while trying to add the submission to your favorites!"))
+
+    elif parsedArgs[0] == "favorites":
+        try:
+            parsedArgs[1]
+            try:
+                await ctx.send(embed=Utils.submissionDataEmbed(favorites.get(ctx.author)[int(parsedArgs[1])]))
+            except:
+                if parsedArgs[1] == "remove":
+                    try:
+                        returnValue = favorites.remove(ctx.author, int(parsedArgs[2]))
+
+                        if returnValue == -1:
+                            await ctx.send(embed=Utils.errorEmbed("You have no favorites!"))
+                        elif returnValue == -2:
+                            await ctx.send(embed=Utils.errorEmbed(f"Index {parsedArgs[2]} is not a valid index of your favorites!"))
+                    except:
+                        await ctx.send(embed=Utils.errorEmbed("A valid index was never supplied!"))
+                else:
+                    await ctx.send(embed=Utils.errorEmbed(f"\"{parsedArgs[1]}\" is not a valid index or option of `.reddit favorites`!"))
+        except:
+            await ctx.send(embed=Utils.favoritesListEmbed(favorites.get(ctx.author)))
 
     else:
         await ctx.send(embed=Utils.errorEmbed(f"\"{parsedArgs[0]}\" is not a valid argument for `.reddit`!"))

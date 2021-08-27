@@ -1,1 +1,0 @@
-from .Favorites import *

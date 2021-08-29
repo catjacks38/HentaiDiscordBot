@@ -1,7 +1,7 @@
 from Favorites import Favorites
 import Utils
 from Nhentai import NHentaiGrabber
-from Reddit import ImageScrapper
+from Reddit import ImageScraper
 import random
 import pickle
 import argparse
@@ -38,7 +38,7 @@ else:
         print("\"options.cfg\" was not found.")
         exit(-1)
 
-imageScrapperReddit = ImageScrapper(options[1], options[2])
+imageScraperReddit = ImageScraper(options[1], options[2])
 nhentaiGrabber = NHentaiGrabber()
 favorites = Favorites()
 
@@ -50,12 +50,12 @@ def getSubmissions(server, parsedArgs, section):
     try:
         parsedArgs[1]
         try:
-            submissions = imageScrapperReddit.Get(server, imageScrapperReddit.subreddits[int(parsedArgs[1])], section)
+            submissions = imageScraperReddit.Get(server, imageScraperReddit.subreddits[int(parsedArgs[1])], section)
         except:
-            submissions = imageScrapperReddit.Get(server, parsedArgs[1], section)
+            submissions = imageScraperReddit.Get(server, parsedArgs[1], section)
     except:
         parsedArgs.append("hentai")
-        submissions = imageScrapperReddit.Get(server, parsedArgs[1], section)
+        submissions = imageScraperReddit.Get(server, parsedArgs[1], section)
 
     # Checks to make sure the Get function returns a list
     # Prints error message if it doesn't
@@ -69,16 +69,16 @@ def getSubmissions(server, parsedArgs, section):
         if len(submissions) > 0:
             choice = random.choice(submissions)
 
-            imageScrapperReddit.Remove(server, parsedArgs[1], "top", choice)
-            imageScrapperReddit.Remove(server, parsedArgs[1], "hot", choice)
+            imageScraperReddit.Remove(server, parsedArgs[1], "top", choice)
+            imageScraperReddit.Remove(server, parsedArgs[1], "hot", choice)
         else:
-            imageScrapperReddit.RefreshCache(server, parsedArgs[1], section)
-            submissions = imageScrapperReddit.Get(server, parsedArgs[1], section)
+            imageScraperReddit.RefreshCache(server, parsedArgs[1], section)
+            submissions = imageScraperReddit.Get(server, parsedArgs[1], section)
 
             choice = random.choice(submissions)
 
-            imageScrapperReddit.Remove(server, parsedArgs[1], "top", choice)
-            imageScrapperReddit.Remove(server, parsedArgs[1], "hot", choice)
+            imageScraperReddit.Remove(server, parsedArgs[1], "top", choice)
+            imageScraperReddit.Remove(server, parsedArgs[1], "hot", choice)
 
         return choice
 
@@ -134,15 +134,15 @@ async def reddit(ctx, *, args):
         try:
             parsedArgs[1]
             try:
-                topReturn = imageScrapperReddit.RefreshCache(ctx.guild, imageScrapperReddit.subreddits[int(parsedArgs[1])], "top")
-                hotReturn = imageScrapperReddit.RefreshCache(ctx.guild, imageScrapperReddit.subreddits[int(parsedArgs[1])], "hot")
+                topReturn = imageScraperReddit.RefreshCache(ctx.guild, imageScraperReddit.subreddits[int(parsedArgs[1])], "top")
+                hotReturn = imageScraperReddit.RefreshCache(ctx.guild, imageScraperReddit.subreddits[int(parsedArgs[1])], "hot")
             except:
-                topReturn = imageScrapperReddit.RefreshCache(ctx.guild, parsedArgs[1], "top")
-                hotReturn = imageScrapperReddit.RefreshCache(ctx.guild, parsedArgs[1], "hot")
+                topReturn = imageScraperReddit.RefreshCache(ctx.guild, parsedArgs[1], "top")
+                hotReturn = imageScraperReddit.RefreshCache(ctx.guild, parsedArgs[1], "hot")
         except:
             parsedArgs.append("hentai")
-            topReturn = imageScrapperReddit.RefreshCache(ctx.guild, parsedArgs[1], "top")
-            hotReturn = imageScrapperReddit.RefreshCache(ctx.guild, parsedArgs[1], "hot")
+            topReturn = imageScraperReddit.RefreshCache(ctx.guild, parsedArgs[1], "top")
+            hotReturn = imageScraperReddit.RefreshCache(ctx.guild, parsedArgs[1], "hot")
 
         # Checks to make sure returnValue is 0
         # If returnValue is -1, there was an error trying to get the posts
@@ -169,13 +169,13 @@ async def reddit(ctx, *, args):
 
     # .reddit subreddits
     elif parsedArgs[0] == "subreddits":
-        await ctx.send(embed=Utils.supportedSubredditsEmbed(imageScrapperReddit.subreddits))
+        await ctx.send(embed=Utils.supportedSubredditsEmbed(imageScraperReddit.subreddits))
 
     elif parsedArgs[0] == "favorite":
         try:
             returnValue = favorites.add(
                 ctx.author,
-                imageScrapperReddit.getSubmission((await ctx.fetch_message(ctx.message.reference.message_id)).embeds[0].fields[0].value[1:-6])
+                imageScraperReddit.getSubmission((await ctx.fetch_message(ctx.message.reference.message_id)).embeds[0].fields[0].value[1:-6])
             )
             if returnValue == -1:
                 await ctx.send(embed=discord.Embed(title="That submission is already in your favorites!", color=Utils.EmbedColor))

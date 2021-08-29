@@ -3,7 +3,7 @@ from discord_variables_plugin import ServerVariables
 
 
 # A class for scrapping the images off of subreddits
-class ImageScrapper:
+class ImageScraper:
     # The limit on how many posts to grab
     topLimit = 200
     hotLimit = 200

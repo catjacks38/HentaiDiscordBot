@@ -1,14 +1,24 @@
 import discord
+from math import ceil
 
 EmbedColor = 0xeb006d
 
 
 # A function for making it easier to make consistent Reddit image embeds
-def redditEmbed(submission):
+def submissionEmbed(submission):
         embed = discord.Embed(title=":arrow_down: Look, Hentai! :arrow_down:", color=EmbedColor)
         embed.set_author(name=f"Hentai posted by u/{submission.author.name}", icon_url=submission.author.icon_img)
         embed.add_field(name="Submission Link:", value=f"[{submission.shortlink}](url)", inline=False)
         embed.set_image(url=submission.url)
+
+        return embed
+
+
+def submissionDataEmbed(submissionData):
+        embed = discord.Embed(title=":arrow_down: Look, Hentai! :arrow_down:", color=EmbedColor)
+        embed.set_author(name=f"Hentai posted by u/{submissionData.authorName}", icon_url=submissionData.authorIconUrl)
+        embed.add_field(name="Submission Link:", value=f"[{submissionData.shortlink}](url)", inline=False)
+        embed.set_image(url=submissionData.imageUrl)
 
         return embed
 
@@ -22,8 +32,8 @@ def errorEmbed(errorMessage):
 def supportedSubredditsEmbed(subreddits):
         stringList = "Index - Subreddit"
 
-        for i in range(len(subreddits)):
-                stringList += f"\n{i} - {subreddits[i]}"
+        for i, subreddit in enumerate(subreddits):
+                stringList += f"\n{i} - {subreddit}"
 
         return discord.Embed(title="Supported subreddits", description=stringList, color=EmbedColor)
 
@@ -100,5 +110,16 @@ def doujinEmbed(cover, doujin):
         embed.add_field(name="Tags:", value="None" if len(doujin.tags) == 0 else "".join(map(lambda x: str(x) + ", ", doujin.tags))[:-2], inline=False)
         embed.add_field(name="Language Tags:", value="None" if len(doujin.languages) == 0 else "".join(map(lambda x: str(x) + ", ", doujin.languages))[:-2], inline=False)
         embed.set_footer(text=f"{doujin.total_pages} pages.")
+
+        return embed
+
+
+def favoritesListEmbed(submissions, page):
+        embed = discord.Embed(title="Your Favorites:", color=EmbedColor)
+
+        for i, submission in enumerate(submissions[page * 6: page * 6 + 6], page * 6):
+                embed.add_field(name=f"{i} - {submission.title}", value=f"[{submission.shortlink}](url)", inline=False)
+
+        embed.set_footer(text=f"Page {page + 1} of {ceil(len(submissions) / 6)}")
 
         return embed

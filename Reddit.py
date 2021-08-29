@@ -152,3 +152,6 @@ class ImageScrapper:
                 return -1
         else:
             return -2
+
+    def getSubmission(self, link):
+        return self.__bot.submission(url=link)

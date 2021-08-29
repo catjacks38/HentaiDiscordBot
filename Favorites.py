@@ -29,7 +29,13 @@ class Favorites:
         except:
             favorites = []
 
-        favorites.append(SubmissionData(submission.url, submission.shortlink, submission.title, submission.author.name, submission.author.icon_img))
+        submissionShortLink = submission.shortlink
+
+        for submissionData in favorites:
+            if submissionData.shortlink == submissionShortLink:
+                return -1
+
+        favorites.append(SubmissionData(submission.url, submissionShortLink, submission.title, submission.author.name, submission.author.icon_img))
 
         self.__userVars.set(user, "favorites", favorites)
         self.__userVars.save(self.userVarsFp)

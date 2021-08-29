@@ -1,4 +1,5 @@
 import discord
+from math import ceil
 
 EmbedColor = 0xeb006d
 
@@ -113,10 +114,12 @@ def doujinEmbed(cover, doujin):
         return embed
 
 
-def favoritesListEmbed(submissions):
-        embed = discord.Embed(title="Your Favorites:")
+def favoritesListEmbed(submissions, page):
+        embed = discord.Embed(title="Your Favorites:", color=EmbedColor)
 
-        for i, submission in enumerate(submissions):
+        for i, submission in enumerate(submissions[page * 6: page * 6 + 6], page * 6):
                 embed.add_field(name=f"{i} - {submission.title}", value=f"[{submission.shortlink}](url)", inline=False)
+
+        embed.set_footer(text=f"Page {page + 1} of {ceil(len(submissions) / 6)}")
 
         return embed

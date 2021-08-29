@@ -7,6 +7,7 @@ import pickle
 import argparse
 import discord
 from discord.ext import commands
+from math import ceil
 
 bot = commands.Bot(command_prefix=".", help_command=None)
 parser = argparse.ArgumentParser(description="discord bot go brrrr")
@@ -172,11 +173,14 @@ async def reddit(ctx, *, args):
 
     elif parsedArgs[0] == "favorite":
         try:
-            favorites.add(
+            returnValue = favorites.add(
                 ctx.author,
                 imageScrapperReddit.getSubmission((await ctx.fetch_message(ctx.message.reference.message_id)).embeds[0].fields[0].value[1:-6])
             )
-            await ctx.send(embed=discord.Embed(title="Submission added to favorites.", color=Utils.EmbedColor))
+            if returnValue == -1:
+                await ctx.send(embed=discord.Embed(title="That submission is already in your favorites!", color=Utils.EmbedColor))
+            else:
+                await ctx.send(embed=discord.Embed(title="Submission added to favorites.", color=Utils.EmbedColor))
         except:
             await ctx.send(embed=Utils.errorEmbed("There was an error while trying to add the submission to your favorites!"))
 
@@ -194,12 +198,47 @@ async def reddit(ctx, *, args):
                             await ctx.send(embed=Utils.errorEmbed("You have no favorites!"))
                         elif returnValue == -2:
                             await ctx.send(embed=Utils.errorEmbed(f"Index {parsedArgs[2]} is not a valid index of your favorites!"))
+                        else:
+                            await ctx.send(embed=discord.Embed(title=f"Your favorite at index {parsedArgs[2]} has been removed", color=Utils.EmbedColor))
+
                     except:
                         await ctx.send(embed=Utils.errorEmbed("A valid index was never supplied!"))
+                elif parsedArgs[1] == "clear":
+                    returnValue = favorites.clear(ctx.author)
+
+                    if returnValue == -1:
+                        await ctx.send(embed=discord.Embed(title="No favorites to clear!", color=Utils.EmbedColor))
+                    else:
+                        await ctx.send(embed=discord.Embed(title="All of your favorites have been cleared.", color=Utils.EmbedColor))
+                elif parsedArgs[1] == "page":
+                    try:
+                        favoriteSubmissions = favorites.get(ctx.author)
+
+                        if favoriteSubmissions == -1:
+                            await ctx.send(embed=discord.Embed(title="You have no saved favorites.", color=Utils.EmbedColor))
+                        else:
+                            if 0 < int(parsedArgs[2]) <= ceil(len(favoriteSubmissions) / 6):
+                                await ctx.send(embed=Utils.favoritesListEmbed(favoriteSubmissions, int(parsedArgs[2]) - 1))
+                            else:
+                                await ctx.send(embed=Utils.errorEmbed("Invalid page number!"))
+                    except:
+                        await ctx.send(embed=Utils.errorEmbed("Missing page number!"))
+                elif parsedArgs[1] == "random":
+                    favoriteSubmissions = favorites.get(ctx.author)
+                    if favoriteSubmissions == -1:
+                        await ctx.send(embed=discord.Embed(title="You have no saved favorites.", color=Utils.EmbedColor))
+                    else:
+                        await ctx.send(embed=Utils.submissionDataEmbed(random.choice(favoriteSubmissions)))
+
                 else:
                     await ctx.send(embed=Utils.errorEmbed(f"\"{parsedArgs[1]}\" is not a valid index or option of `.reddit favorites`!"))
         except:
-            await ctx.send(embed=Utils.favoritesListEmbed(favorites.get(ctx.author)))
+            favoriteSubmissions = favorites.get(ctx.author)
+
+            if favoriteSubmissions == -1:
+                await ctx.send(embed=discord.Embed(title="You have no saved favorites.", color=Utils.EmbedColor))
+            else:
+                await ctx.send(embed=Utils.favoritesListEmbed(favoriteSubmissions, 0))
 
     else:
         await ctx.send(embed=Utils.errorEmbed(f"\"{parsedArgs[0]}\" is not a valid argument for `.reddit`!"))
@@ -346,6 +385,43 @@ async def help(ctx, *, args=""):
         embed.add_field(
             name=".reddit subreddits",
             value="Lists all the supported subreddits.",
+            inline=False
+        )
+        embed.add_field(
+            name=".reddit favorite",
+            value="Add a submission to your favorites. To select the submissiom, type this command, and reply to the submission embed.",
+            inline=False
+        )
+        embed.add_field(
+            name=".reddit favorites <favorites submission index>",
+            value="Lists the first page of your favorites, "
+                  "or selects a favorite submission by it's index (the number on the left of the submission title) if a number is supplied."
+                  "\nExample:"
+                  "\n`.reddit favorites 0`",
+            inline=False
+        )
+        embed.add_field(
+            name=".reddit favorites page <page number>",
+            value="Selects the page to list your favorites."
+                  "\nExample:"
+                  "\n`.reddit favorites page 1`",
+            inline=False
+        )
+        embed.add_field(
+            name=".reddit favorites random",
+            value="Selects a random submission from your favorites.",
+            inline=False
+        )
+        embed.add_field(
+            name=".reddit favorites remove <favorites submission index>",
+            value="Removes a favorite submission of favorites submission index (the number on the left of the submission title) from your favorites."
+                  "\nExample:"
+                  "\n`.reddit favorites remove 0`",
+            inline=False
+        )
+        embed.add_field(
+            name=".reddit favorites clear",
+            value="Clears **all** of your favorites.",
             inline=False
         )
 

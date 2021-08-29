@@ -50,8 +50,33 @@ To start the bot again, type in
 ### Examples:
 - `.reddit refresh hentai`
 - `.reddit refresh 0`
+
 ### `.reddit subreddits`
 - List all the supported subreddits.
+
+### `.reddit favorite`
+- Add a submission to your favorites. To select the submissiom, type this command, and reply to the submission embed.
+
+### `.reddit favorites <favorites submission index>`
+- Lists the first page of your favorites, or selects a favorite submission by it's index (the number on the left of the submission title) if a number is supplied.
+### Example:
+- `.reddit favorites 0`
+
+### `.reddit favorites page <page number>`
+- Selects the page to list your favorites.
+### Example:
+- `.reddit favorites page 1`
+
+### `.reddit favorites random`
+- Selects a random submission from your favorites.
+
+### `.reddit favorites remove <favorites submission index>`
+- Removes a favorite submission of favorites submission index (the number on the left of the submission title) from your favorites.
+### Example:
+- `.reddit favorites remove 0`
+
+### `.reddit favorites clear`
+- Clears **all** of your favorites.
 
 ## `.nhentai` Usage
 

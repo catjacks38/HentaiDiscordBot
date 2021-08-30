@@ -14,6 +14,7 @@ def submissionEmbed(submission):
         return embed
 
 
+# A function for making reddit submission embeds from SubmissionData classes
 def submissionDataEmbed(submissionData):
         embed = discord.Embed(title=":arrow_down: Look, Hentai! :arrow_down:", color=EmbedColor)
         embed.set_author(name=f"Hentai posted by u/{submissionData.authorName}", icon_url=submissionData.authorIconUrl)
@@ -114,6 +115,7 @@ def doujinEmbed(cover, doujin):
         return embed
 
 
+# A function for creating an embed of the user's favorites of a page number
 def favoritesListEmbed(submissions, page):
         embed = discord.Embed(title="Your Favorites:", color=EmbedColor)
 

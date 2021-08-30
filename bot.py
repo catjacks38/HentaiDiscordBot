@@ -65,7 +65,7 @@ def getSubmissions(server, parsedArgs, section):
 
     else:
         # If submissions length is more than zero, a random submission will be chosen and removed from the submissions
-        # Else, The cache will be refreshed, then a random submission will be chosen and removed from the submissions
+        # Else, The cache will be refreshed, then a random submission will be chosen and removed from the submissions of the hot and top sections
         if len(submissions) > 0:
             choice = random.choice(submissions)
 
@@ -173,74 +173,112 @@ async def reddit(ctx, *, args):
 
     elif parsedArgs[0] == "favorite":
         try:
+            # Attempts to parse the embed to get the reddit shortlink
             returnValue = favorites.add(
                 ctx.author,
                 imageScraperReddit.getSubmission((await ctx.fetch_message(ctx.message.reference.message_id)).embeds[0].fields[0].value[1:-6])
             )
+
             if returnValue == -1:
+                # If the submission is already stored in the user's favorites
                 await ctx.send(embed=discord.Embed(title="That submission is already in your favorites!", color=Utils.EmbedColor))
             else:
+                # If the submission was saved to the user's favorites
                 await ctx.send(embed=discord.Embed(title="Submission added to favorites.", color=Utils.EmbedColor))
         except:
+            # If the user replies to an invalid embed, doesn't reply, etc. Basically if there is an error, this is send.
             await ctx.send(embed=Utils.errorEmbed("There was an error while trying to add the submission to your favorites!"))
 
+    # .reddit favorites <arguments lol>
     elif parsedArgs[0] == "favorites":
+        # Checks if the first argument of .reddit favorites is supplied
+        # If an argument isn't supplied, then the first page of the user's favorites will be shown
         try:
             parsedArgs[1]
+
+            # Checks to see if the first argument of .reddit favorites is an integer
             try:
+                # Sends a SubmissionData embed of the user's favorites of the index of first argument
                 await ctx.send(embed=Utils.submissionDataEmbed(favorites.get(ctx.author)[int(parsedArgs[1])]))
             except:
+                # If the first argument of .reddit favorites is not an integer
+                # .reddit favorites remove <favorites submission index>
                 if parsedArgs[1] == "remove":
                     try:
+                        # If the 2nd argument of .reddit favorites is an integer
                         returnValue = favorites.remove(ctx.author, int(parsedArgs[2]))
 
                         if returnValue == -1:
+                            # Sends error embed if the user has no favorites
                             await ctx.send(embed=Utils.errorEmbed("You have no favorites!"))
                         elif returnValue == -2:
+                            # Sends error embed if the index is not in the user's favorites
                             await ctx.send(embed=Utils.errorEmbed(f"Index {parsedArgs[2]} is not a valid index of your favorites!"))
                         else:
+                            # Sends this embed if the removal was successful
                             await ctx.send(embed=discord.Embed(title=f"Your favorite at index {parsedArgs[2]} has been removed", color=Utils.EmbedColor))
 
                     except:
+                        # Sends error embed if the index is not valid
                         await ctx.send(embed=Utils.errorEmbed("A valid index was never supplied!"))
+
+                # .reddit favorites clear
                 elif parsedArgs[1] == "clear":
                     returnValue = favorites.clear(ctx.author)
 
                     if returnValue == -1:
+                        # Sends failure message embed if there are no favorites to clear
                         await ctx.send(embed=discord.Embed(title="No favorites to clear!", color=Utils.EmbedColor))
                     else:
+                        # Sends success message embed
                         await ctx.send(embed=discord.Embed(title="All of your favorites have been cleared.", color=Utils.EmbedColor))
+
+                # .reddit favorites page <favorites page number>
                 elif parsedArgs[1] == "page":
                     try:
+                        # If a page number was supplied for argument 1 of .reddit favorites page
                         favoriteSubmissions = favorites.get(ctx.author)
 
                         if favoriteSubmissions == -1:
+                            # If the user has no saved favorites this embed message will be sent
                             await ctx.send(embed=discord.Embed(title="You have no saved favorites.", color=Utils.EmbedColor))
                         else:
                             if 0 < int(parsedArgs[2]) <= ceil(len(favoriteSubmissions) / 6):
+                                # If the page is more or equal to 1 and less than or equal to the total pages
                                 await ctx.send(embed=Utils.favoritesListEmbed(favoriteSubmissions, int(parsedArgs[2]) - 1))
                             else:
+                                # If the page number is invalid
                                 await ctx.send(embed=Utils.errorEmbed("Invalid page number!"))
                     except:
+                        # If a page number wasn't supplied, and error embed will be send
                         await ctx.send(embed=Utils.errorEmbed("Missing page number!"))
+                # .reddit favorites random
                 elif parsedArgs[1] == "random":
                     favoriteSubmissions = favorites.get(ctx.author)
+
                     if favoriteSubmissions == -1:
+                        # If you have no favorites, send a message back
                         await ctx.send(embed=discord.Embed(title="You have no saved favorites.", color=Utils.EmbedColor))
                     else:
+                        # Send a random favorites submission
                         await ctx.send(embed=Utils.submissionDataEmbed(random.choice(favoriteSubmissions)))
 
                 else:
+                    # The first argument supplied was not valid
                     await ctx.send(embed=Utils.errorEmbed(f"\"{parsedArgs[1]}\" is not a valid index or option of `.reddit favorites`!"))
+        # Sends the first page of the user's favorites if no arguments are supplied
         except:
             favoriteSubmissions = favorites.get(ctx.author)
 
             if favoriteSubmissions == -1:
+                # Sends a message if the user has no saved favorites
                 await ctx.send(embed=discord.Embed(title="You have no saved favorites.", color=Utils.EmbedColor))
             else:
+                # Sends the first page of the user's favorites
                 await ctx.send(embed=Utils.favoritesListEmbed(favoriteSubmissions, 0))
 
     else:
+        # If the argument isn't a command of .reddit
         await ctx.send(embed=Utils.errorEmbed(f"\"{parsedArgs[0]}\" is not a valid argument for `.reddit`!"))
 
 

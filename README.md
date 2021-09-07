@@ -115,6 +115,12 @@ To start the bot again, type in
 ### `.nhentai list`
 - List all of your saved tags.
 
+### `.nhentai remove <parameters>`
+- Removes tags of the user's saved tags (doesn't remove a saved language though; use `.nhentai clear language` for that)
+### Examples:
+- `.nhentai remove required=paizuri banned=netorare`
+- `.nhentai remove required=paizuri, story arc banned=netorare, mind control`
+
 ### `.nhentai clear <saved tag (optional)>`
 - Clears all of your saved tags, unless if a saved tag is supplied (can only be required, banned, or language).
 ### Examples:

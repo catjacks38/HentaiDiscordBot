@@ -374,7 +374,19 @@ async def nhentai(ctx, *, args):
 
         await ctx.send(embed=embed)
 
-    # .nhentai clear
+    # .nhentai remove <args>
+    elif parsedArgs[0] == "remove":
+        required, banned, _ = Utils.nhentaiParseKeys(args)
+        returnValue = nhentaiGrabber.remove(ctx.author, required, banned)
+
+        if returnValue == -1:
+            # The user tried to remove a tag that wasn't in their saved tags
+            await ctx.send(embed=Utils.errorEmbed("One or more of your requested to be removed tags is not apart of your saved tags."))
+        else:
+            # Success message
+            await ctx.send(embed=discord.Embed(title="Removed tags.", color=Utils.EmbedColor))
+
+    # .nhentai clear <user saved tag section thing>
     elif parsedArgs[0] == "clear":
         try:
             # If parsedArgs[1] is supplied, and it is equal to either required, banned, or language
@@ -506,6 +518,14 @@ async def help(ctx, *, args=""):
         embed.add_field(
             name=".nhentai list",
             value="List all of your saved tags.",
+            inline=False
+        )
+        embed.add_field(
+            name=".nhentai remove <parameters>",
+            value="Removes tags of the user's saved tags (doesn't remove a saved language though; use `.nhentai clear language` for that)"
+                  "\nExamples:"
+                  "\n`.nhentai remove required=paizuri banned=netorare`"
+                  "\n`.nhentai remove required=paizuri, story arc banned=netorare, mind control`",
             inline=False
         )
         embed.add_field(

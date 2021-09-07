@@ -65,6 +65,35 @@ class NHentaiGrabber:
         # If there is no tag saved, return None for that tag
         return required, banned, lang
 
+    def remove(self, user, required, banned):
+        savedRequired, savedBanned, _ = self.get(user)
+
+        # Removes every required tag of user in required
+        # Returns -1 if a tag of required is not saved to the user's required tags
+        if required:
+            for tag in required:
+                try:
+                    savedRequired.remove(tag)
+                except:
+                    return -1
+
+        # Removes every banned tag of user in banned
+        # Returns -1 if a tag of banned is not saved to the user's banned tags
+        if banned:
+            for tag in banned:
+                try:
+                    savedBanned.remove(tag)
+                except:
+                    return -1
+
+        # Clears the saved tags if the tags to be set are empty
+        if not savedRequired:
+            self.clear(user, "required")
+        if not savedBanned:
+            self.clear(user, "banned")
+
+        self.set(user, savedRequired, savedBanned, None)
+
     def clear(self, user, var=None):
         try:
             # If var is set, remove var of user

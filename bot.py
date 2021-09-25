@@ -44,18 +44,18 @@ favorites = Favorites()
 
 
 # Function to help with getting submissions
-def getSubmissions(server, parsedArgs, section):
+async def getSubmissions(server, parsedArgs, section):
     # Checks if the seconds argument is a string name of the subreddit or an index of the subreddit
     # If it is neither, it will be defaulted to r/hentai
     try:
         parsedArgs[1]
         try:
-            submissions = imageScraperReddit.Get(server, imageScraperReddit.subreddits[int(parsedArgs[1])], section)
+            submissions = await imageScraperReddit.Get(server, imageScraperReddit.subreddits[int(parsedArgs[1])], section)
         except:
-            submissions = imageScraperReddit.Get(server, parsedArgs[1], section)
+            submissions = await imageScraperReddit.Get(server, parsedArgs[1], section)
     except:
         parsedArgs.append("hentai")
-        submissions = imageScraperReddit.Get(server, parsedArgs[1], section)
+        submissions = await imageScraperReddit.Get(server, parsedArgs[1], section)
 
     # Checks to make sure the Get function returns a list
     # Prints error message if it doesn't
@@ -69,16 +69,16 @@ def getSubmissions(server, parsedArgs, section):
         if len(submissions) > 0:
             choice = random.choice(submissions)
 
-            imageScraperReddit.Remove(server, parsedArgs[1], "top", choice)
-            imageScraperReddit.Remove(server, parsedArgs[1], "hot", choice)
+            await imageScraperReddit.Remove(server, parsedArgs[1], "top", choice)
+            await imageScraperReddit.Remove(server, parsedArgs[1], "hot", choice)
         else:
-            imageScraperReddit.RefreshCache(server, parsedArgs[1], section)
-            submissions = imageScraperReddit.Get(server, parsedArgs[1], section)
+            await imageScraperReddit.RefreshCache(server, parsedArgs[1], section)
+            submissions = await imageScraperReddit.Get(server, parsedArgs[1], section)
 
             choice = random.choice(submissions)
 
-            imageScraperReddit.Remove(server, parsedArgs[1], "top", choice)
-            imageScraperReddit.Remove(server, parsedArgs[1], "hot", choice)
+            await imageScraperReddit.Remove(server, parsedArgs[1], "top", choice)
+            await imageScraperReddit.Remove(server, parsedArgs[1], "hot", choice)
 
         return choice
 
@@ -101,10 +101,10 @@ async def reddit(ctx, *, args):
     if parsedArgs[0] == "top":
         # If there is an error trying to display the Reddit embed, remove the submission, and repeat until there is no error
         while 1:
-            choice = getSubmissions(ctx.guild, parsedArgs, "top")
+            choice = await getSubmissions(ctx.guild, parsedArgs, "top")
 
             try:
-                await ctx.send(embed=Utils.submissionEmbed(choice))
+                await ctx.send(embed=Utils.submissionDataEmbed(choice))
                 break
             except:
                 pass
@@ -113,10 +113,10 @@ async def reddit(ctx, *, args):
     elif parsedArgs[0] == "hot":
         # If there is an error trying to display the Reddit embed, remove the submission, and repeat until there is no error
         while 1:
-            choice = getSubmissions(ctx.guild, parsedArgs, "hot")
+            choice = await getSubmissions(ctx.guild, parsedArgs, "hot")
 
             try:
-                await ctx.send(embed=Utils.submissionEmbed(choice))
+                await ctx.send(embed=Utils.submissionDataEmbed(choice))
                 break
             except:
                 pass
@@ -134,15 +134,15 @@ async def reddit(ctx, *, args):
         try:
             parsedArgs[1]
             try:
-                topReturn = imageScraperReddit.RefreshCache(ctx.guild, imageScraperReddit.subreddits[int(parsedArgs[1])], "top")
-                hotReturn = imageScraperReddit.RefreshCache(ctx.guild, imageScraperReddit.subreddits[int(parsedArgs[1])], "hot")
+                topReturn = await imageScraperReddit.RefreshCache(ctx.guild, imageScraperReddit.subreddits[int(parsedArgs[1])], "top")
+                hotReturn = await imageScraperReddit.RefreshCache(ctx.guild, imageScraperReddit.subreddits[int(parsedArgs[1])], "hot")
             except:
-                topReturn = imageScraperReddit.RefreshCache(ctx.guild, parsedArgs[1], "top")
-                hotReturn = imageScraperReddit.RefreshCache(ctx.guild, parsedArgs[1], "hot")
+                topReturn = await imageScraperReddit.RefreshCache(ctx.guild, parsedArgs[1], "top")
+                hotReturn = await imageScraperReddit.RefreshCache(ctx.guild, parsedArgs[1], "hot")
         except:
             parsedArgs.append("hentai")
-            topReturn = imageScraperReddit.RefreshCache(ctx.guild, parsedArgs[1], "top")
-            hotReturn = imageScraperReddit.RefreshCache(ctx.guild, parsedArgs[1], "hot")
+            topReturn = await imageScraperReddit.RefreshCache(ctx.guild, parsedArgs[1], "top")
+            hotReturn = await imageScraperReddit.RefreshCache(ctx.guild, parsedArgs[1], "hot")
 
         # Checks to make sure returnValue is 0
         # If returnValue is -1, there was an error trying to get the posts
@@ -174,9 +174,9 @@ async def reddit(ctx, *, args):
     elif parsedArgs[0] == "favorite":
         try:
             # Attempts to parse the embed to get the reddit shortlink
-            returnValue = favorites.add(
+            returnValue = await favorites.add(
                 ctx.author,
-                imageScraperReddit.getSubmission((await ctx.fetch_message(ctx.message.reference.message_id)).embeds[0].fields[0].value[1:-6])
+                await imageScraperReddit.getSubmission((await ctx.fetch_message(ctx.message.reference.message_id)).embeds[0].fields[0].value[1:-6])
             )
 
             if returnValue == -1:

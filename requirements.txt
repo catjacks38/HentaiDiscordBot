@@ -2,3 +2,4 @@ discord.py
 praw
 discord_variables_plugin
 Nhentai-API
+asyncpraw

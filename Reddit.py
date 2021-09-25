@@ -1,5 +1,6 @@
-import praw
+import asyncpraw
 from discord_variables_plugin import ServerVariables
+from Favorites import SubmissionData
 
 
 # A class for scrapping the images off of subreddits
@@ -15,7 +16,7 @@ class ImageScraper:
 
     def __init__(self, clientID, clientSecret):
         # Creates bot
-        self.__bot = praw.Reddit(user_agent="Image Scrapper Thing (by u/catjacks38)", client_id=clientID, client_secret=clientSecret)
+        self.__bot = asyncpraw.Reddit(user_agent="Image Scrapper Thing (by u/catjacks38)", client_id=clientID, client_secret=clientSecret)
         self.__serverVars = ServerVariables()
 
         # Tries to read the cache files
@@ -25,7 +26,7 @@ class ImageScraper:
         except:
             self.__serverVars.save(self.serverVarsFp)
 
-    def RefreshCache(self, server, subreddit, section):
+    async def RefreshCache(self, server, subreddit, section):
 
         submissions = []
         sr = "hentai"
@@ -37,24 +38,34 @@ class ImageScraper:
 
         # Tries to get the submissions, and returns -1 if it fails
         # If section is not a valid section, the function returns -2
-        try:
+        # try:
             if section == "top":
-                posts = self.__bot.subreddit(sr).top("day", limit=self.topLimit)
+                tempSr = await self.__bot.subreddit(sr)
+
+                print(f"Refreshing {section} of r/{sr}")
+                async for post in tempSr.top("day", limit=self.topLimit):
+                    url = post.url
+
+                    # Only appends the URL if it is an image URL
+                    if url[:18] == "https://i.redd.it/" or url[:20] == "https://i.imgur.com/":
+                        await post.author.load()
+                        submissions.append(SubmissionData(url, post.shortlink, post.title, post.author.name, post.author.icon_img))
+
             elif section == "hot":
-                posts = self.__bot.subreddit(sr).hot(limit=self.hotLimit)
+                tempSr = await self.__bot.subreddit(sr)
+
+                print(f"Refreshing {section} of r/{sr}")
+                async for post in tempSr.hot(limit=self.hotLimit):
+                    url = post.url
+
+                    # Only appends the URL if it is an image URL
+                    if url[:18] == "https://i.redd.it/" or url[:20] == "https://i.imgur.com/":
+                        await post.author.load()
+                        submissions.append(SubmissionData(url, post.shortlink, post.title, post.author.name, post.author.icon_img))
             else:
                 return -2
-        except:
-            return -1
-
-        print(f"Refreshing {section} of r/{sr}")
-
-        for post in posts:
-            url = post.url
-
-            # Only appends the URL if it is an image URL
-            if url[:18] == "https://i.redd.it/" or url[:20] == "https://i.imgur.com/":
-                submissions.append(post)
+        # except:
+        #     return -1
 
         # Tries to insert data into a new key or existing key of newCache
         # Creates a new dictionary if there are no caches of sr
@@ -62,7 +73,7 @@ class ImageScraper:
             newCache = self.__serverVars.get(server, sr)
             newCache[section] = submissions
         except:
-            newCache = {section : submissions}
+            newCache = {section: submissions}
 
         # Saves the posts to serverVars
         self.__serverVars.set(server, sr, newCache)
@@ -70,7 +81,7 @@ class ImageScraper:
 
         return 0
 
-    def Get(self, server, subreddit, section):
+    async def Get(self, server, subreddit, section):
         sr = "hentai"
 
         # Checks to see if the subreddit is valid
@@ -80,7 +91,6 @@ class ImageScraper:
 
         # If section is not a valid section, the function returns -2
         if section == "top":
-
             # Refreshes cache if there is no cache
             try:
                 submissions = self.__serverVars.get(server, sr)
@@ -88,7 +98,7 @@ class ImageScraper:
             except:
                 pass
 
-            returnValue = self.RefreshCache(server, sr, "top")
+            returnValue = await self.RefreshCache(server, sr, "top")
 
             # Loads the top submissions of sr, and returns the submissions if returnValue is 0
             # If returnValue is not zero, the function will return returnValue
@@ -98,7 +108,6 @@ class ImageScraper:
                 return returnValue
 
         elif section == "hot":
-
             # Refreshes cache if there is no cache
             try:
                 submissions = self.__serverVars.get(server, sr)
@@ -106,7 +115,7 @@ class ImageScraper:
             except:
                 pass
 
-            returnValue = self.RefreshCache(server, sr, "hot")
+            returnValue = await self.RefreshCache(server, sr, "hot")
 
             # Loads the hot submissions of sr, and returns the submissions if returnValue is 0
             # If returnValue is not zero, the function will return returnValue
@@ -117,7 +126,7 @@ class ImageScraper:
         else:
             return -2
 
-    def Remove(self, server, subreddit, section, submission):
+    async def Remove(self, server, subreddit, section, submission):
         sr = "hentai"
 
         # Checks to see if the subreddit is valid
@@ -153,5 +162,5 @@ class ImageScraper:
         else:
             return -2
 
-    def getSubmission(self, link):
-        return self.__bot.submission(url=link)
+    async def getSubmission(self, link):
+        return await self.__bot.submission(url=link)

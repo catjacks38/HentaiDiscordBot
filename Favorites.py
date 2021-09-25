@@ -24,7 +24,7 @@ class Favorites:
         except:
             self.__userVars.save(self.userVarsFp)
 
-    def add(self, user, submission):
+    async def add(self, user, submission):
         # Attempts to read the user's favorites
         # If it fails, set favorites to an empty list
         try:
@@ -40,6 +40,7 @@ class Favorites:
                 return -1
 
         # Appends the submission to favorites
+        await submission.author.load()
         favorites.append(SubmissionData(submission.url, submissionShortLink, submission.title, submission.author.name, submission.author.icon_img))
 
         # Sets and saved favorites to the favorites variable of user

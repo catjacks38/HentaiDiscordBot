@@ -1,9 +1,6 @@
 # HentaiDiscordBot
 ## It's a discord bot, but for degenerates. 👍
 
-## Inviting the Bot to Your Server
-Hopefully I don't regret giving this link out, but here it is: [Invite Link](https://discord.com/api/oauth2/authorize?client_id=873751579470233722&permissions=171799071808&scope=bot)
-
 ## Script Requirements
 ### Interpreter:
 - Python 3

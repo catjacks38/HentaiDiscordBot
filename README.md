@@ -3,7 +3,7 @@
 
 ## Script Requirements
 ### Interpreter:
-- Python 3
+- Python 3.9
 ### Packages
 - discord.py
 - praw
